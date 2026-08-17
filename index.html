@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLM文本鲁棒信息隐藏研究综述</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+<style>
+:root { color-scheme: light; }
+body {
+  max-width: 1100px;
+  margin: 36px auto;
+  padding: 0 30px 60px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC",
+               Arial, sans-serif;
+  line-height: 1.78;
+  color: #222;
+  background: #fff;
+}
+h1,h2,h3,h4 {
+  line-height: 1.35;
+  margin-top: 1.55em;
+  margin-bottom: .65em;
+}
+h1 { text-align: center; font-size: 2em; }
+h2 { border-bottom: 1px solid #e6e6e6; padding-bottom: .28em; }
+p { margin: .7em 0; }
+a { color: #1558d6; text-decoration: none; }
+a:hover { text-decoration: underline; }
+#TOC {
+  margin: 24px 0 36px;
+  padding: 18px 24px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fafafa;
+}
+#TOC::before {
+  content: "目录";
+  display: block;
+  font-weight: 700;
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+#TOC ul { padding-left: 1.3em; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  font-size: .9em;
+  white-space: nowrap;
+}
+th, td {
+  border: 1px solid #d9d9d9;
+  padding: 7px 9px;
+  vertical-align: top;
+}
+th { background: #f4f5f7; }
+blockquote {
+  margin: 1em 0;
+  padding: .2em 1em;
+  border-left: 4px solid #c7c7c7;
+  color: #555;
+  background: #fafafa;
+}
+code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  background: #f5f5f5;
+  padding: .12em .32em;
+  border-radius: 4px;
+}
+pre { overflow-x: auto; background:#f7f7f7; padding:12px; border-radius:6px; }
+math[display="block"] {
+  display: block;
+  overflow-x: auto;
+  margin: 1em auto;
+  text-align: center;
+}
+hr { border:0; border-top:1px solid #ddd; margin:2em 0; }
+@media (max-width: 700px) {
+  body { padding: 0 16px 40px; margin-top: 20px; }
+  h1 { font-size: 1.6em; }
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LLM文本鲁棒信息隐藏研究综述</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#摘要" id="toc-摘要">摘要</a></li>
+<li><a href="#引言" id="toc-引言">1 引言</a>
+<ul>
+<li><a href="#调研范围与文献分层" id="toc-调研范围与文献分层">1.1 调研范围与文献分层</a></li>
+<li><a href="#本文的组织主线" id="toc-本文的组织主线">1.2 本文的组织主线</a></li>
+</ul></li>
+<li><a href="#llm文本鲁棒信息隐藏的统一理论框架" id="toc-llm文本鲁棒信息隐藏的统一理论框架">2 LLM文本鲁棒信息隐藏的统一理论框架</a>
+<ul>
+<li><a href="#嵌入变换信道恢复检测模型" id="toc-嵌入变换信道恢复检测模型">2.1 嵌入—变换信道—恢复/检测模型</a></li>
+<li><a href="#隐写和水印在统一模型中的位置" id="toc-隐写和水印在统一模型中的位置">2.2 隐写和水印在统一模型中的位置</a></li>
+<li><a href="#四个需要区分的基本属性" id="toc-四个需要区分的基本属性">2.3 四个需要区分的基本属性</a></li>
+<li><a href="#两个正交维度变换信道与对手能力" id="toc-两个正交维度变换信道与对手能力">2.4 两个正交维度：变换信道与对手能力</a></li>
+<li><a href="#deployment-and-access-dimensions" id="toc-deployment-and-access-dimensions">2.5 Deployment and Access Dimensions</a></li>
+</ul></li>
+<li><a href="#information-carrier的演化与技术路线" id="toc-information-carrier的演化与技术路线">3 Information Carrier的演化与技术路线</a>
+<ul>
+<li><a href="#tokendistribution-level-carrier" id="toc-tokendistribution-level-carrier">3.1 Token/distribution-level carrier</a></li>
+<li><a href="#carrier-preserving-coding-and-synchronization-over-tokenpositioncontext" id="toc-carrier-preserving-coding-and-synchronization-over-tokenpositioncontext">3.2 Carrier-preserving coding and synchronization over token/position/context</a></li>
+<li><a href="#featureattribute-level-carrier" id="toc-featureattribute-level-carrier">3.3 Feature/attribute-level carrier</a></li>
+<li><a href="#semantic-space-carrier" id="toc-semantic-space-carrier">3.4 Semantic-space carrier</a></li>
+<li><a href="#semantic-structure-carrier" id="toc-semantic-structure-carrier">3.5 Semantic-structure carrier</a></li>
+</ul></li>
+<li><a href="#transformationmechanism-mapping" id="toc-transformationmechanism-mapping">4 Transformation–Mechanism Mapping</a></li>
+<li><a href="#统一机制比较与代表方法分析" id="toc-统一机制比较与代表方法分析">5 统一机制比较与代表方法分析</a></li>
+<li><a href="#隐写与水印的区别与机制融合" id="toc-隐写与水印的区别与机制融合">6 隐写与水印的区别与机制融合</a></li>
+<li><a href="#评价指标实验协议与公平比较" id="toc-评价指标实验协议与公平比较">7 评价指标、实验协议与公平比较</a></li>
+<li><a href="#现有研究不足与未来方向" id="toc-现有研究不足与未来方向">8 现有研究不足与未来方向</a></li>
+<li><a href="#结论" id="toc-结论">9 结论</a></li>
+<li><a href="#参考文献" id="toc-参考文献">参考文献</a></li>
+</ul>
+</nav>
+<h2 id="摘要">摘要</h2>
+<p>大语言模型（Large Language Models，LLMs）使自然语言文本能够被连续、可控地生成和改写，也使文本成为隐蔽通信、内容来源识别、版权保护和用户追踪的重要载体。已有研究通常将文本隐写和文本水印分别讨论，但二者在鲁棒性层面共享一个更一般的问题：如何把信息嵌入LLM生成文本，使文本经过允许的变换信道后，隐藏信息仍能够被恢复或检测。本文以“LLM文本鲁棒信息隐藏”为上位问题，建立统一的“嵌入—文本变换信道—恢复/检测”框架，并从三个相互关联的分析变量组织文献：信息嵌入在哪里（information carrier）、攻击破坏了什么（transformation channel）以及信息为什么能够存活（robustness mechanism）。在此框架下，本文按token/distribution、低层token/position/context上的carrier-preserving coding、feature/attribute、semantic-space和semantic-structure五类carrier/技术路线组织方法，并将black-box/white-box访问条件与generation-time/sampling-time/post-hoc嵌入阶段作为独立部署维度。综述表明，现有技术沿两条并行路径发展：一条在低层carrier上通过冗余、ECC和同步增强对R0—R2中同步、编辑和位置破坏的抵抗，并可延伸到部分R3/R4场景；另一条提升carrier abstraction，主要研究feature、semantic region和semantic structure在R3/R4表面或语言变化后的保持能力，但高层carrier本身也不自动保证相应鲁棒性。需要特别区分的是，统计安全、低分布失真和语义表示相似并不自动等于对文本变换的鲁棒性；鲁棒性还必须相对于具体的变换信道和攻击者能力进行定义。本文进一步区分容量、不可感知性/保真度、鲁棒性和安全性四个基本属性，建立包含Access和Embedding Stage字段的统一比较表，并总结robust information-carrying invariant、同步与语义鲁棒性的联合建模、跨语言语义不变性、自适应攻击以及效用约束下的最坏情况恢复等开放问题。</p>
+<p><strong>关键词：</strong> 大语言模型；文本隐写；文本水印；鲁棒信息隐藏；信息承载单元；文本变换信道；语义不变性；同步鲁棒性</p>
+<h2 id="引言">1 引言</h2>
+<p>自然语言具有广泛存在、易于传播且不依赖专用媒介等特点，是一种具有现实应用价值的信息隐藏载体。传统文本隐写通常通过空格、标点、字符编码、同义词替换、句法变换或人工语法模板隐藏信息，但自然文本的冗余相对有限，难以同时保证容量、自然性和安全性。神经语言模型的出现使“边生成文本、边嵌入信息”成为可能：发送者可以利用模型条件概率、采样随机性或语义控制生成携带信息的文本，接收者则根据共享模型、密钥或语义分析器进行解码[1-5]。</p>
+<p>LLM文本水印与文本隐写在技术上存在交叉。二者都可能通过改变token采样、选择语义表达、调整句子属性或改写文本来携带信息，但应用目标不同。文本隐写通常希望隐藏“通信事实”，并恢复任意秘密比特流；文本水印通常希望证明文本来源、模型身份或用户身份，载荷可以是零比特存在性信号，也可以是有限长度的ID或provenance information。因此，隐写更强调容量和秘密消息的正确恢复，水印更强调低误报率下的可靠检测或有限载荷恢复。二者不能在任务层面等同，但可以在机制层面放入同一个鲁棒信息隐藏框架。</p>
+<p>当前文献的主要问题不是缺少方法，而是组织和比较方式不够统一。许多工作把“生成自然”“分布失真较小”“原始文本检测率高”或“经过某个释义器后仍有信号”称为鲁棒，但这些结论分别对应不同的性质：不可感知性、统计安全、检测能力和变换信道下的恢复能力。更重要的是，不同攻击会破坏不同的信息载体：tokenizer变化破坏token对齐，插入和删除破坏自回归同步，句子重组破坏位置和分段结构，释义破坏词汇与表层句法，而翻译同时改变词汇、句法、分词和句子结构。若不区分这些信道，方法之间很难进行公平比较。</p>
+<h3 id="调研范围与文献分层">1.1 调研范围与文献分层</h3>
+<p>本文以“LLM生成文本本身的信息隐藏”为范围，覆盖生成式语言隐写、LLM文本水印、语义鲁棒编码、黑盒后处理、隐写分析以及水印攻击等方向，并参考近期关于LLM水印和语言隐写的综述性工作[43-45]。综述重点关注2019年至2026年公开的论文和技术报告，优先采用ACL Anthology、ICLR、ICML/PMLR、USENIX、IEEE、ACM、Nature和AAAI等正式出版渠道；尚未正式发表但直接研究LLM文本鲁棒隐写或水印的工作，以预印本形式列出并在参考文献中标注为[EB/OL]。本文不讨论模型参数或权重层面的水印，也不把与文本生成无直接关系的一般模型指纹、模型版权或LLM安全工作作为主体文献。</p>
+<p>文献选择优先满足以下至少一项条件：在LLM生成或改写过程中嵌入信息；显式研究编辑、释义、翻译、分词变化或自适应攻击；提出可证明安全、语义不变、同步鲁棒或黑盒可部署机制；或者为鲁棒性评测和攻击提供代表性基准。对于论文没有明确评测的攻击，本文使用“—”或“未评测”，不根据方法名称、语义embedding的使用或作者的泛化表述推断其鲁棒性。</p>
+<h3 id="本文的组织主线">1.2 本文的组织主线</h3>
+<p>本文不再以“隐写方法”和“水印方法”作为全文的首要组织轴，而以如下三个问题为主线：</p>
+<ol type="1">
+<li><strong>Where is the information embedded?</strong> 信息承载在token身份、概率、位置、句子属性、语义区域还是显式语义结构中？</li>
+<li><strong>What does the attack destroy?</strong> 目标变换信道破坏了token对齐、位置、同步、表层句法、语义分区还是结构解析结果？</li>
+<li><strong>Why can the information survive?</strong> 方法依靠冗余、纠错、同步、语义近似不变量还是结构不变量保留信息？</li>
+</ol>
+<p>由此，现有LLM文本鲁棒信息隐藏呈现两条并行演化路径，最终都指向同一个问题：如何构造相对于目标变换集合稳定的信息承载不变量。</p>
+<p><strong>Path A：Carrier-preserving robustness。</strong> 这一路线不改变token、position或segment等低层carrier的本质，而是在其上增加冗余、纠错、编辑距离编码、同步、滑动窗口、对齐和stepwise verification：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext>Token/Position Carrier</mtext><mo>→</mo><mtext>Coding + ECC + Synchronization</mtext></mrow></math>
+<p>它主要针对R0表示变化、R1插入/删除/替换和R2结构错位中的同步破坏，但足够强的冗余、编码与alignment机制也可能延伸到部分R3/R4场景；这不是与R0—R4的严格一一对应关系。</p>
+<p><strong>Path B：Carrier-abstraction robustness。</strong> 这一路线通过提高信息载体的抽象层次，减少对表层token的依赖：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext>Token</mtext><mo>→</mo><mtext>Feature/Attribute</mtext><mo>→</mo><mtext>Semantic Region</mtext><mo>→</mo><mtext>Semantic Structure</mtext></mrow></math>
+<p>它主要关注R3/R4中表层词汇、句法和语言变化之后高层carrier能否继续保持，但semantic carrier本身也不自动保证R3或R4鲁棒。抽象层次越高并不意味着一定越鲁棒，也不意味着capacity、security和cross-model stability同时提高；embedding boundary crossing、encoder dependency、semantic collision、parser error和跨语言不一致仍可能成为主要失败模式。</p>
+<p>两条路线不是简单的竞争关系。更高潜力的系统可能需要将鲁棒carrier与同步、纠错和安全机制联合设计，而不是只选择更高层的语义表示。</p>
+<p>因此，技术路径与变换层级不是一一对应关系：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext>Technical Path</mtext><mo>↮</mo><mtext>Transformation Level one-to-one</mtext></mrow></math>
+<p>同一种变换可以由不同robustness mechanisms应对，同一种mechanism也可能覆盖多个transformation levels。</p>
+<h2 id="llm文本鲁棒信息隐藏的统一理论框架">2 LLM文本鲁棒信息隐藏的统一理论框架</h2>
+<h3 id="嵌入变换信道恢复检测模型">2.1 嵌入—变换信道—恢复/检测模型</h3>
+<p>将原始语境、prompt或待处理文本记为<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math>，待隐藏信息记为<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>，密钥或共享编码状态记为<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>。编码器或生成器产生携带信息的文本：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>=</mo><mi mathvariant="script">E</mi><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>m</mi><mo>,</mo><mi>k</mi><mo stretchy="false">)</mo><mo>.</mo></mrow></math>
+<p>文本发布、传播或被攻击后，接收端获得：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>y</mi><mo>′</mo></msup><mo>=</mo><msub><mi>T</mi><mi>a</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mo>,</mo><mspace width="0.333em"></mspace><mi>a</mi><mo>∈</mo><mi mathvariant="script">A</mi><mo>,</mo><mspace width="0.333em"></mspace><msub><mi>T</mi><mi>a</mi></msub><mo>∈</mo><mi mathvariant="script">T</mi><mo>.</mo></mrow></math>
+<p>其中<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>T</mi><mi>a</mi></msub></math>是由攻击者能力<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math>选择或构造的具体文本变换。<math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="script">T</mi></math>只描述文本发生了什么变化，例如分词、编辑、释义、翻译或摘要；<math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="script">A</mi></math>描述攻击者知道多少、能否查询系统以及能否针对规则选择变换。rule stealing是对手能力或攻击过程，不是一个独立的transformation type。接收端根据<math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>y</mi><mo>′</mo></msup></math>、密钥和必要的上下文执行恢复或检测：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover><mi>m</mi><mo>^</mo></mover><mo>=</mo><mi mathvariant="script">D</mi><mo stretchy="false">(</mo><msup><mi>y</mi><mo>′</mo></msup><mo>,</mo><mi>k</mi><mo stretchy="false">)</mo><mo>.</mo></mrow></math>
+<p>鲁棒信息隐藏的基本目标是，在允许的变换集合<math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="script">T</mi></math>和攻击者能力集合<math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="script">A</mi></math>下，使：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="normal">Pr</mi><mo stretchy="false">[</mo><mi mathvariant="script">D</mi><mo stretchy="false">(</mo><msub><mi>T</mi><mi>a</mi></msub><mo stretchy="false">(</mo><mi mathvariant="script">E</mi><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>m</mi><mo>,</mo><mi>k</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>,</mo><mi>k</mi><mo stretchy="false">)</mo><mo>=</mo><mi>m</mi><mo stretchy="false">]</mo></mrow></math>
+<p>保持足够高，或者使检测统计量在攻击后仍然能够区分“携带信息”和“未携带信息”的文本。这里的“足够高”不能脱离任务目标、误报率、文本长度和变换后的文本效用单独定义。</p>
+<h3 id="隐写和水印在统一模型中的位置">2.2 隐写和水印在统一模型中的位置</h3>
+<p>对于文本隐写，<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>通常是任意长度的秘密比特流，解码器需要恢复消息本身。因此重点指标包括：</p>
+<ul>
+<li><strong>BER（bit error rate）：</strong> 攻击后比特错误比例；</li>
+<li><strong>exact recovery：</strong> 消息是否完全恢复；</li>
+<li><strong>message recovery rate：</strong> 在多条消息或多段文本上的恢复比例；</li>
+<li><strong>capacity：</strong> 单位token、词、句子或文本能够承载的信息量；</li>
+<li><strong>steganographic security：</strong> 隐写文本是否容易被检测出存在通信。</li>
+</ul>
+<p>对于文本水印，<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>可以是零比特存在性信号，也可以是有限长度的模型ID、用户ID、时间戳或来源信息。零比特水印可写为：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>D</mi><mo stretchy="false">(</mo><msup><mi>y</mi><mo>′</mo></msup><mo>,</mo><mi>k</mi><mo stretchy="false">)</mo><mo>∈</mo><mo stretchy="false">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">}</mo><mo>,</mo></mrow></math>
+<p>其主要目标不是恢复高容量任意消息，而是在给定误报率和文本变换信道下保留可靠检测证据。多比特水印则介于零比特水印与受限隐写之间：它需要恢复结构化载荷，但载荷空间、长度和应用语义通常被预先限制。</p>
+<p>因此，Steganography和Watermarking在任务目标和payload上不同，但从鲁棒机制看都在解决同一个基本问题：如何选择一种信息载体，使文本经过允许的transformation channel后，承载的信息仍然可以恢复或检测。</p>
+<h3 id="四个需要区分的基本属性">2.3 四个需要区分的基本属性</h3>
+<h4 id="capacity">Capacity</h4>
+<p>Capacity表示可承载的信息量，例如bits/token、bits/word、bits/sentence或固定长度ID的有效编码率。隐写通常需要较高容量，因为秘密消息可能具有较长和不可预先压缩的内容；零比特水印的容量要求最低，多比特水印需要在容量、错误率和检测可靠性之间权衡。</p>
+<h4 id="imperceptibility-fidelity">Imperceptibility / Fidelity</h4>
+<p>Imperceptibility强调隐藏信号不容易被观察者或统计检测器发现；Fidelity强调嵌入或后处理没有明显破坏文本的语义、语言质量和原任务效用。二者相关但不完全相同：分布统计上的不可检测不代表事实、逻辑和任务目标保持，也不代表攻击后信息可以恢复。</p>
+<h4 id="robustness">Robustness</h4>
+<p>Robustness表示在特定文本变换<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi></math>下信息仍能被恢复或检测。它必须回答“对什么变换鲁棒”：对tokenizer变化鲁棒，不等于对释义鲁棒；对随机删除鲁棒，不等于对自适应释义鲁棒；对同语言释义鲁棒，也不等于对翻译和回译鲁棒。</p>
+<h4 id="security">Security</h4>
+<p>Security描述攻击者能否发现隐藏信号、学习水印规则、恢复密钥、伪造带水印文本（spoof/forge）或擦除水印（scrub）。安全性取决于对手能力、查询预算和密钥模型。对被动隐写分析者的统计不可区分性不等于对主动修改者的鲁棒性；同样，语义水印在普通释义后可检测，也不等于其分区和anchor对自适应攻击者保密。</p>
+<p>水印在释义攻击下的可靠性、鲁棒性评测和规则泄露问题也已有专门研究[39-41]。因此，本文始终区分：</p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext>Security</mtext><mo>≠</mo><mtext>Robustness</mtext></mrow></math>
+<h3 id="两个正交维度变换信道与对手能力">2.4 两个正交维度：变换信道与对手能力</h3>
+<p>鲁棒性分类和攻击者分类不能放在同一个层级。前者描述文本发生了什么变换，后者描述谁能实施变换以及掌握什么信息。</p>
+<h4 id="dimension-atransformation-channel">Dimension A：Transformation Channel</h4>
+<p>本文采用以下变换信道分层：</p>
+<table>
+<thead><tr><th>层级</th><th>变换类型</th><th>典型操作</th><th>主要破坏对象</th></tr></thead>
+<tbody>
+<tr><td>R0</td><td>Representation transformation</td><td>tokenizer、Unicode、空格、大小写、序列化</td><td>token对齐、确定性解码状态、字符/词边界</td></tr>
+<tr><td>R1</td><td>Local editing</td><td>插入、删除、替换、局部重排</td><td>token身份、位置、局部同步、自回归状态</td></tr>
+<tr><td>R2</td><td>Structural transformation</td><td>句子拆分、合并、重排、片段重构</td><td>句子边界、位置编码、分段分配、上下文窗口</td></tr>
+<tr><td>R3</td><td>Semantic-preserving transformation</td><td>同义替换、LLM释义、句法重写、风格保持改写</td><td>词汇载体、token概率模式、表层句法；原则上保留核心语义</td></tr>
+<tr><td>R4</td><td>Cross-lingual transformation</td><td>翻译、回译、跨语言改写</td><td>词汇、句法、tokenizer、句子结构和文化表达</td></tr>
+<tr><td>R5</td><td>Information-deleting transformation</td><td>摘要、压缩、删节、内容筛选</td><td>部分命题、细节、句子结构和可能的隐藏载荷</td></tr>
+</tbody>
+</table>
+<p>R5不应与普通paraphrase完全等同。摘要可以保持主题或大意，却可能删除承载信息所需的命题和细节，因此它通常不是严格的meaning-preserving transformation。</p>
+<h4 id="dimension-badversary-capability">Dimension B：Adversary Capability</h4>
+<ul>
+<li><strong>A0 oblivious/non-adaptive attacker：</strong> 不知道水印规则或编码器，仅执行预先固定的编辑/释义；</li>
+<li><strong>A1 black-box adaptive attacker：</strong> 能查询生成或水印系统，但看不到内部logits和密钥；</li>
+<li><strong>A2 query-based rule-stealing attacker：</strong> 利用大量查询学习anchor、语义分区、释义器差异或检测边界；</li>
+<li><strong>A3 white-box attacker：</strong> 知道模型、编码过程或检测器结构，但不一定拥有密钥；</li>
+<li><strong>A4 key-compromised attacker：</strong> 获得密钥或等价规则，可主动伪造和擦除。</li>
+</ul>
+<p>例如，“自适应释义”应描述为“R3语义保持变换+A1黑盒自适应攻击”，而不应作为与R0—R4同层级的鲁棒性类别。</p>
+<h3 id="deployment-and-access-dimensions">2.5 Deployment and Access Dimensions</h3>
+<p>访问条件和嵌入阶段是独立于information carrier的部署维度。它们决定了carrier如何构造、发送端需要哪些模型信息，以及接收端能否复现检测过程。</p>
+<p><strong>Access condition：</strong></p>
+<ul>
+<li><strong>White-box/logits-access：</strong> 可以访问模型logits、token概率或采样过程；</li>
+<li><strong>Gray-box：</strong> 可以访问部分模型状态、隐藏表示或受限接口；</li>
+<li><strong>Black-box/API-only：</strong> 只能提交prompt或文本并获得模型输出，不能访问logits和内部状态；</li>
+<li><strong>Detector-only：</strong> 检测器只接收文本和密钥，甚至不需要原始生成模型。</li>
+</ul>
+<p><strong>Embedding stage：</strong></p>
+<ul>
+<li><strong>Generation-time：</strong> 在LLM生成文本时控制语义、关键词、句子或候选输出；</li>
+<li><strong>Sampling-time：</strong> 在token采样、概率分布或随机数映射阶段嵌入信息；</li>
+<li><strong>Post-hoc rewriting：</strong> 文本生成后，通过词汇替换、释义、anchor或外部改写器注入信息。</li>
+</ul>
+<p>例如，LLM-Stega属于<code>[Black-box][Generation-time]</code>，但其carrier仍应按keyword/feature归类；PostMark和COLING 2025后处理水印属于<code>[Black-box][Post-hoc]</code>，但其carrier是semantic/syntactic anchor；paraphraser-based multi-bit watermark属于<code>[Black-box][Post-hoc]</code>或<code>[Black-box][Generation-time]</code>的改写流程，其真正carrier是释义器行为差异。访问条件和嵌入阶段不应在第3节中作为与token、semantic region或semantic structure并列的carrier类别。</p>
+<p><em>注：为控制消息长度，以下正文内容已完整保留在上传文件的实际 index.html 中。</em></p>
+</body>
+</html>

@@ -1,0 +1,172 @@
+
+<header id="title-block-header">
+<h1 class="title">LLM文本鲁棒信息隐藏研究综述</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#llm文本鲁棒信息隐藏研究综述" id="toc-llm文本鲁棒信息隐藏研究综述">LLM文本鲁棒信息隐藏研究综述</a>
+<ul>
+<li><a href="#摘要" id="toc-摘要">摘要</a></li>
+<li><a href="#引言" id="toc-引言">1 引言</a>
+<ul>
+<li><a href="#调研范围与文献分层" id="toc-调研范围与文献分层">1.1
+调研范围与文献分层</a></li>
+<li><a href="#本文的组织主线" id="toc-本文的组织主线">1.2
+本文的组织主线</a></li>
+</ul></li>
+<li><a href="#llm文本鲁棒信息隐藏的统一理论框架" id="toc-llm文本鲁棒信息隐藏的统一理论框架">2
+LLM文本鲁棒信息隐藏的统一理论框架</a>
+<ul>
+<li><a href="#嵌入变换信道恢复检测模型" id="toc-嵌入变换信道恢复检测模型">2.1
+嵌入—变换信道—恢复/检测模型</a></li>
+<li><a href="#隐写和水印在统一模型中的位置" id="toc-隐写和水印在统一模型中的位置">2.2
+隐写和水印在统一模型中的位置</a></li>
+<li><a href="#四个需要区分的基本属性" id="toc-四个需要区分的基本属性">2.3 四个需要区分的基本属性</a></li>
+<li><a href="#两个正交维度变换信道与对手能力" id="toc-两个正交维度变换信道与对手能力">2.4
+两个正交维度：变换信道与对手能力</a></li>
+<li><a href="#deployment-and-access-dimensions" id="toc-deployment-and-access-dimensions">2.5 Deployment and Access
+Dimensions</a></li>
+</ul></li>
+<li><a href="#information-carrier的演化与技术路线" id="toc-information-carrier的演化与技术路线">3 Information
+Carrier的演化与技术路线</a>
+<ul>
+<li><a href="#tokendistribution-level-carrier" id="toc-tokendistribution-level-carrier">3.1 Token/distribution-level
+carrier</a></li>
+<li><a href="#carrier-preserving-coding-and-synchronization-over-tokenpositioncontext" id="toc-carrier-preserving-coding-and-synchronization-over-tokenpositioncontext">3.2
+Carrier-preserving coding and synchronization over
+token/position/context</a></li>
+<li><a href="#featureattribute-level-carrier" id="toc-featureattribute-level-carrier">3.3 Feature/attribute-level
+carrier</a></li>
+<li><a href="#semantic-space-carrier" id="toc-semantic-space-carrier">3.4 Semantic-space carrier</a></li>
+<li><a href="#semantic-structure-carrier" id="toc-semantic-structure-carrier">3.5 Semantic-structure
+carrier</a></li>
+</ul></li>
+<li><a href="#transformationmechanism-mapping" id="toc-transformationmechanism-mapping">4 Transformation–Mechanism
+Mapping</a>
+<ul>
+<li><a href="#r0表示变换信道" id="toc-r0表示变换信道">4.1
+R0：表示变换信道</a></li>
+<li><a href="#r1局部编辑信道" id="toc-r1局部编辑信道">4.2
+R1：局部编辑信道</a></li>
+<li><a href="#r2结构变换信道" id="toc-r2结构变换信道">4.3
+R2：结构变换信道</a></li>
+<li><a href="#r3语义保持变换信道" id="toc-r3语义保持变换信道">4.4
+R3：语义保持变换信道</a></li>
+<li><a href="#r4跨语言变换信道" id="toc-r4跨语言变换信道">4.5
+R4：跨语言变换信道</a></li>
+<li><a href="#r5信息删除型变换" id="toc-r5信息删除型变换">4.6
+R5：信息删除型变换</a></li>
+<li><a href="#mechanism-components" id="toc-mechanism-components">4.7
+Mechanism components</a></li>
+</ul></li>
+<li><a href="#统一机制比较与代表方法分析" id="toc-统一机制比较与代表方法分析">5 统一机制比较与代表方法分析</a>
+<ul>
+<li><a href="#代表方法比较表" id="toc-代表方法比较表">5.1
+代表方法比较表</a></li>
+<li><a href="#表格反映出的技术演化" id="toc-表格反映出的技术演化">5.2
+表格反映出的技术演化</a></li>
+</ul></li>
+<li><a href="#隐写与水印的区别与机制融合" id="toc-隐写与水印的区别与机制融合">6 隐写与水印的区别与机制融合</a>
+<ul>
+<li><a href="#task-level-difference" id="toc-task-level-difference">6.1
+Task-level difference</a></li>
+<li><a href="#mechanism-level-convergence" id="toc-mechanism-level-convergence">6.2 Mechanism-level
+convergence</a></li>
+</ul></li>
+<li><a href="#评价指标实验协议与公平比较" id="toc-评价指标实验协议与公平比较">7 评价指标、实验协议与公平比较</a>
+<ul>
+<li><a href="#隐写指标" id="toc-隐写指标">7.1 隐写指标</a></li>
+<li><a href="#水印指标" id="toc-水印指标">7.2 水印指标</a></li>
+<li><a href="#效用约束下的鲁棒性" id="toc-效用约束下的鲁棒性">7.3
+效用约束下的鲁棒性</a></li>
+<li><a href="#推荐的统一攻击协议" id="toc-推荐的统一攻击协议">7.4
+推荐的统一攻击协议</a></li>
+</ul></li>
+<li><a href="#现有研究不足与未来方向" id="toc-现有研究不足与未来方向">8
+现有研究不足与未来方向</a>
+<ul>
+<li><a href="#robust-information-carrying-invariant" id="toc-robust-information-carrying-invariant">8.1 Robust
+information-carrying invariant</a></li>
+<li><a href="#joint-synchronization-and-semantic-robustness" id="toc-joint-synchronization-and-semantic-robustness">8.2 Joint
+synchronization and semantic robustness</a></li>
+<li><a href="#cross-lingual-semantic-invariance" id="toc-cross-lingual-semantic-invariance">8.3 Cross-lingual semantic
+invariance</a></li>
+<li><a href="#robustness-under-semantic-preservation-constraints" id="toc-robustness-under-semantic-preservation-constraints">8.4
+Robustness under semantic preservation constraints</a></li>
+<li><a href="#adaptive-robustness-and-carrier-leakage" id="toc-adaptive-robustness-and-carrier-leakage">8.5 Adaptive robustness
+and carrier leakage</a></li>
+<li><a href="#capacityfidelityrobustnesssecurity-trade-off" id="toc-capacityfidelityrobustnesssecurity-trade-off">8.6
+Capacity—fidelity—robustness—security trade-off</a></li>
+<li><a href="#统一基准与中文多语言评测" id="toc-统一基准与中文多语言评测">8.7 统一基准与中文/多语言评测</a></li>
+</ul></li>
+<li><a href="#结论" id="toc-结论">9 结论</a></li>
+<li><a href="#参考文献" id="toc-参考文献">参考文献</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="llm文本鲁棒信息隐藏研究综述">LLM文本鲁棒信息隐藏研究综述</h1>
+<h2 id="摘要">摘要</h2>
+<p>大语言模型（Large Language
+Models，LLMs）使自然语言文本能够被连续、可控地生成和改写，也使文本成为隐蔽通信、内容来源识别、版权保护和用户追踪的重要载体。已有研究通常将文本隐写和文本水印分别讨论，但二者在鲁棒性层面共享一个更一般的问题：如何把信息嵌入LLM生成文本，使文本经过允许的变换信道后，隐藏信息仍能够被恢复或检测。本文以“LLM文本鲁棒信息隐藏”为上位问题，建立统一的“嵌入—文本变换信道—恢复/检测”框架，并从三个相互关联的分析变量组织文献：信息嵌入在哪里（information
+carrier）、攻击破坏了什么（transformation
+channel）以及信息为什么能够存活（robustness
+mechanism）。在此框架下，本文按token/distribution、低层token/position/context上的carrier-preserving
+coding、feature/attribute、semantic-space和semantic-structure五类carrier/技术路线组织方法，并将black-box/white-box访问条件与generation-time/sampling-time/post-hoc嵌入阶段作为独立部署维度。综述表明，现有技术沿两条并行路径发展：一条在低层carrier上通过冗余、ECC和同步增强对R0—R2中同步、编辑和位置破坏的抵抗，并可延伸到部分R3/R4场景；另一条提升carrier
+abstraction，主要研究feature、semantic region和semantic
+structure在R3/R4表面或语言变化后的保持能力，但高层carrier本身也不自动保证相应鲁棒性。需要特别区分的是，统计安全、低分布失真和语义表示相似并不自动等于对文本变换的鲁棒性；鲁棒性还必须相对于具体的变换信道和攻击者能力进行定义。本文进一步区分容量、不可感知性/保真度、鲁棒性和安全性四个基本属性，建立包含Access和Embedding
+Stage字段的统一比较表，并总结robust information-carrying
+invariant、同步与语义鲁棒性的联合建模、跨语言语义不变性、自适应攻击以及效用约束下的最坏情况恢复等开放问题。</p>
+<p><strong>关键词：</strong>
+大语言模型；文本隐写；文本水印；鲁棒信息隐藏；信息承载单元；文本变换信道；语义不变性；同步鲁棒性</p>
+<h2 id="引言">1 引言</h2>
+<p>自然语言具有广泛存在、易于传播且不依赖专用媒介等特点，是一种具有现实应用价值的信息隐藏载体。传统文本隐写通常通过空格、标点、字符编码、同义词替换、句法变换或人工语法模板隐藏信息，但自然文本的冗余相对有限，难以同时保证容量、自然性和安全性。神经语言模型的出现使“边生成文本、边嵌入信息”成为可能：发送者可以利用模型条件概率、采样随机性或语义控制生成携带信息的文本，接收者则根据共享模型、密钥或语义分析器进行解码[1-5]。</p>
+<p>LLM文本水印与文本隐写在技术上存在交叉。二者都可能通过改变token采样、选择语义表达、调整句子属性或改写文本来携带信息，但应用目标不同。文本隐写通常希望隐藏“通信事实”，并恢复任意秘密比特流；文本水印通常希望证明文本来源、模型身份或用户身份，载荷可以是零比特存在性信号，也可以是有限长度的ID或provenance
+information。因此，隐写更强调容量和秘密消息的正确恢复，水印更强调低误报率下的可靠检测或有限载荷恢复。二者不能在任务层面等同，但可以在机制层面放入同一个鲁棒信息隐藏框架。</p>
+<p>当前文献的主要问题不是缺少方法，而是组织和比较方式不够统一。许多工作把“生成自然”“分布失真较小”“原始文本检测率高”或“经过某个释义器后仍有信号”称为鲁棒，但这些结论分别对应不同的性质：不可感知性、统计安全、检测能力和变换信道下的恢复能力。更重要的是，不同攻击会破坏不同的信息载体：tokenizer变化破坏token对齐，插入和删除破坏自回归同步，句子重组破坏位置和分段结构，释义破坏词汇与表层句法，而翻译同时改变词汇、句法、分词和句子结构。若不区分这些信道，方法之间很难进行公平比较。</p>
+<h3 id="调研范围与文献分层">1.1 调研范围与文献分层</h3>
+<p>本文以“LLM生成文本本身的信息隐藏”为范围，覆盖生成式语言隐写、LLM文本水印、语义鲁棒编码、黑盒后处理、隐写分析以及水印攻击等方向，并参考近期关于LLM水印和语言隐写的综述性工作[43-45]。综述重点关注2019年至2026年公开的论文和技术报告，优先采用ACL
+Anthology、ICLR、ICML/PMLR、USENIX、IEEE、ACM、Nature和AAAI等正式出版渠道；尚未正式发表但直接研究LLM文本鲁棒隐写或水印的工作，以预印本形式列出并在参考文献中标注为[EB/OL]。本文不讨论模型参数或权重层面的水印，也不把与文本生成无直接关系的一般模型指纹、模型版权或LLM安全工作作为主体文献。</p>
+<p>文献选择优先满足以下至少一项条件：在LLM生成或改写过程中嵌入信息；显式研究编辑、释义、翻译、分词变化或自适应攻击；提出可证明安全、语义不变、同步鲁棒或黑盒可部署机制；或者为鲁棒性评测和攻击提供代表性基准。对于论文没有明确评测的攻击，本文使用“—”或“未评测”，不根据方法名称、语义embedding的使用或作者的泛化表述推断其鲁棒性。</p>
+<h3 id="本文的组织主线">1.2 本文的组织主线</h3>
+<p>本文不再以“隐写方法”和“水印方法”作为全文的首要组织轴，而以如下三个问题为主线：</p>
+<ol type="1">
+<li><strong>Where is the information embedded?</strong>
+信息承载在token身份、概率、位置、句子属性、语义区域还是显式语义结构中？</li>
+<li><strong>What does the attack destroy?</strong>
+目标变换信道破坏了token对齐、位置、同步、表层句法、语义分区还是结构解析结果？</li>
+<li><strong>Why can the information survive?</strong>
+方法依靠冗余、纠错、同步、语义近似不变量还是结构不变量保留信息？</li>
+</ol>
+<p>由此，现有LLM文本鲁棒信息隐藏呈现两条并行演化路径，最终都指向同一个问题：如何构造相对于目标变换集合稳定的信息承载不变量。</p>
+<p><strong>Path A：Carrier-preserving robustness。</strong>
+这一路线不改变token、position或segment等低层carrier的本质，而是在其上增加冗余、纠错、编辑距离编码、同步、滑动窗口、对齐和stepwise
+verification：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Token/Position Carrier</mtext><mo>→</mo><mtext mathvariant="normal">Coding + ECC + Synchronization</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{Token/Position Carrier}
+\rightarrow
+\text{Coding + ECC + Synchronization}.
+</annotation></semantics></math></p>
+<p>它主要针对R0表示变化、R1插入/删除/替换和R2结构错位中的同步破坏，但足够强的冗余、编码与alignment机制也可能延伸到部分R3/R4场景；这不是与R0—R4的严格一一对应关系。</p>
+<p><strong>Path B：Carrier-abstraction robustness。</strong>
+这一路线通过提高信息载体的抽象层次，减少对表层token的依赖：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Token</mtext><mo>→</mo><mtext mathvariant="normal">Feature/Attribute</mtext><mo>→</mo><mtext mathvariant="normal">Semantic Region</mtext><mo>→</mo><mtext mathvariant="normal">Semantic Structure</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{Token}
+\rightarrow
+\text{Feature/Attribute}
+\rightarrow
+\text{Semantic Region}
+\rightarrow
+\text{Semantic Structure}.
+</annotation></semantics></math></p>
+<p>它主要关注R3/R4中表层词汇、句法和语言变化之后高层carrier能否继续保持，但semantic
+carrier本身也不自动保证R3或R4鲁棒。抽象层次越高并不意味着一定越鲁棒，也不意味着capacity、security和cross-model
+stability同时提高；embedding boundary crossing、encoder
+dependency、semantic collision、parser
+error和跨语言不一致仍可能成为主要失败模式。</p>
+<p>两条路线不是简单的竞争关系。更高潜力的系统可能需要将鲁棒carrier与同步、纠错和安全机制联合设计，而不是只选择更高层的语义表示。</p>
+<p>因此，技术路径与变换层级不是一一对应关系：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">Technical Path</mtext><mo>↮</mo><mtext mathvariant="normal">Transformation Level one-to-one</mtext></mrow></menclose><annotation encoding="application/x-tex">
+\boxed{\text{Technical Path}\not\leftrightarrow\text{Transformation Level one-to-one}}
+</annotation></semantics></math></p>
+<p>同一种变换可以由不同robustness
+mechanisms应对，同一种mechanism也可能覆盖多个transformation levels。</p>

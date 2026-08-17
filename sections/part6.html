@@ -1,0 +1,71 @@
+<h2 id="隐写与水印的区别与机制融合">6 隐写与水印的区别与机制融合</h2>
+<h3 id="task-level-difference">6.1 Task-level difference</h3>
+<table><colgroup><col style="width: 33%"/><col style="width: 33%"/><col style="width: 33%"/></colgroup><thead><tr class="header"><th>维度</th><th>文本隐写</th><th>文本水印</th></tr></thead><tbody>
+<tr class="odd"><td>任务目标</td><td>隐藏通信存在并恢复秘密消息</td><td>证明来源、版权、身份或责任归属</td></tr>
+<tr class="even"><td>Payload</td><td>通常为任意长度比特流</td><td>零比特信号或有限长度ID/provenance</td></tr>
+<tr class="odd"><td>接收端</td><td>通常需要共享模型、密钥和编码状态</td><td>可由持钥或部分公开检测器完成</td></tr>
+<tr class="even"><td>成功条件</td><td>BER低、exact recovery或message recovery</td><td>AUROC、TPR@FPR或身份匹配率高</td></tr>
+<tr class="odd"><td>核心容量要求</td><td>高，容量直接影响通信效率</td><td>零比特最低，多比特时受限但需要可靠</td></tr>
+<tr class="even"><td>不可感知目标</td><td>隐藏“存在通信”</td><td>普通用户不可见，但允许检测器确认来源</td></tr>
+<tr class="odd"><td>典型失败</td><td>同步破坏、消息级联错误、隐写分析发现</td><td>低误报率下降、释义擦除、规则窃取、伪造</td></tr>
+</tbody></table>
+<p>因此：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Steganography</mtext><mo>≠</mo><mtext mathvariant="normal">Watermarking</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">\text{Steganography}\neq\text{Watermarking}.</annotation></semantics></math></p>
+<p>二者不能仅因使用相似的token采样或语义分区技术而混为一谈。</p>
+<h3 id="mechanism-level-convergence">6.2 Mechanism-level convergence</h3>
+<p>二者正在共享相同的机制模块：token sampling、keyed partition、rejection sampling、semantic region、semantic anchor、ECC、position allocation、synchronization和semantic structure。多比特水印尤其接近“restricted-payload steganography”，因为它也令：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>∈</mo><mo form="prefix" stretchy="false">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><msup><mo form="postfix" stretchy="false">}</mo><mi>L</mi></msup></mrow><annotation encoding="application/x-tex">m\in\{0,1\}^{L}</annotation></semantics></math></p>
+<p>并执行分段编码、错误纠正和消息恢复。但安全目标仍不同：隐写要尽量隐藏通信事实，水印通常允许持钥检测器明确判断水印存在。水印可以牺牲容量换取可靠检测，隐写则不能简单依赖低容量和明显的检测信号来获得鲁棒性。</p>
+<p>这种融合关系也解释了为什么语义鲁棒水印通常比高容量语义隐写更容易实现：水印可以只需让少量语义统计保留，而隐写需要在攻击后恢复任意消息的多个比特，并同时维持通信不可检测性。</p>
+<h2 id="评价指标实验协议与公平比较">7 评价指标、实验协议与公平比较</h2>
+<h3 id="隐写指标">7.1 隐写指标</h3>
+<p>隐写实验至少应报告：</p>
+<ol type="1"><li><strong>Capacity：</strong> bits/token、bits/word、bits/sentence和有效载荷率；</li><li><strong>Extraction：</strong> exact recovery、bit accuracy、BER、message match rate；</li><li><strong>Imperceptibility：</strong> KL/JS散度、总变差、困惑度、隐写分析AUC和人类偏好；</li><li><strong>Fidelity：</strong> BLEU、BERTScore、事实一致性、任务效用和人工语义判断；</li><li><strong>Transformation robustness：</strong> 每个R0—R5攻击强度下的BER/恢复率曲线；</li><li><strong>Security：</strong> A0—A4对手下的检测、规则窃取、spoof和scrub成功率；</li><li><strong>Efficiency：</strong> 编解码速度、显存、模型调用次数、prompt长度和密钥管理成本。</li></ol>
+<h3 id="水印指标">7.2 水印指标</h3>
+<p>水印实验至少应报告：</p>
+<ol type="1"><li><strong>Detection：</strong> AUROC、AUPRC、TPR@FPR、p-value和不同文本长度下的检测曲线；</li><li><strong>Detection length：</strong> 达到目标FPR所需的最小token数或句子数；</li><li><strong>Fidelity：</strong> PPL、任务准确率、语义相似度、事实一致性和人工偏好；</li><li><strong>Multi-bit：</strong> bit accuracy、message match rate、coding rate和用户ID碰撞率；</li><li><strong>R0—R5 robustness：</strong> 编辑、结构重构、释义、翻译和信息删除后的检测/提取性能；</li><li><strong>Security：</strong> watermark stealing、spoofing、scrubbing、密钥恢复成本和查询预算；</li><li><strong>Calibration：</strong> 低误报率下的阈值、跨领域误报、短文本和低熵文本表现。</li></ol>
+<h3 id="效用约束下的鲁棒性">7.3 效用约束下的鲁棒性</h3>
+<p>攻击越强，越可能改变文本内容本身。因此不能只报告攻击后BER或TPR，还应同时报告攻击后的效用。可将鲁棒性写为带效用约束的最坏情况性能：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><mo>min</mo><mrow><mi>T</mi><mo>∈</mo><mi>𝒯</mi><mo>:</mo><mspace width="0.222em"></mspace><mi>U</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>T</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>,</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>≥</mo><mi>τ</mi></mrow></munder><mo>RecoveryOrDetection</mo><mrow><mo form="prefix" stretchy="true">(</mo><mi>T</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo form="postfix" stretchy="true">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">\min_{T\in\mathcal{T}:\ U(T(y),y)\ge\tau}\operatorname{RecoveryOrDetection}(T(y)).</annotation></semantics></math></p>
+<p>其中<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>U</mi><annotation encoding="application/x-tex">U</annotation></semantics></math>可以是语义一致性、事实一致性、任务效用或人工可接受度。该定义避免把“把文本完全重写成无关内容”当作合理去水印攻击，也能比较不同攻击强度下鲁棒性与文本效用的折衷。</p>
+<h3 id="推荐的统一攻击协议">7.4 推荐的统一攻击协议</h3>
+<table><colgroup><col style="width: 33%"/><col style="width: 33%"/><col style="width: 33%"/></colgroup><thead><tr class="header"><th>维度</th><th>建议操作</th><th>必须报告</th></tr></thead><tbody>
+<tr class="odd"><td>R0表示</td><td>重分词、Unicode、空格、大小写、序列化</td><td>tokenizer、版本、字符归一化和恢复率</td></tr>
+<tr class="even"><td>R1局部编辑</td><td>插入、删除、替换，逐步增加比例</td><td>编辑率、位置分布、BER/TPR曲线</td></tr>
+<tr class="odd"><td>R2结构</td><td>拆句、合句、重排、chunk重构</td><td>结构变化比例、句子数和语义保持度</td></tr>
+<tr class="even"><td>R3语义</td><td>同义替换、LLM释义、句法和风格改写</td><td>释义模型、提示词、攻击强度、语义效用</td></tr>
+<tr class="odd"><td>R4跨语言</td><td>翻译、回译、跨语言释义</td><td>源/目标语言、翻译模型、语义保持度</td></tr>
+<tr class="even"><td>R5信息删除</td><td>摘要、压缩、删节</td><td>删除率、主旨保留、是否属于任务允许信道</td></tr>
+<tr class="odd"><td>A1/A2自适应</td><td>query-based释义、规则学习、anchor推断</td><td>查询预算、攻击者观察内容和训练数据</td></tr>
+<tr class="even"><td>A3/A4强对手</td><td>白盒去水印、密钥泄露、伪造和擦除</td><td>是否拥有模型/密钥、攻击成本和成功率</td></tr>
+</tbody></table>
+<h2 id="现有研究不足与未来方向">8 现有研究不足与未来方向</h2>
+<h3 id="robust-information-carrying-invariant">8.1 Robust information-carrying invariant</h3>
+<p>最核心的开放问题是：什么文本属性能够在保持语义和文本效用的变换信道下足够稳定，同时又能够被密钥控制并承载足够的信息？现有carrier已经从token、position、keyword、semantic embedding、semantic cluster发展到semantic structure，但尚没有一种carrier同时满足：paraphrase stable、translation stable、high capacity、low distortion、key controllable、hard to forge和cross-model stable。未来需要显式寻找相对于变换集合<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>的近似不变量<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>T</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo form="postfix" stretchy="true">)</mo></mrow><mo>≈</mo><mi>C</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>,</mo><mspace width="2.0em"></mspace><mi>T</mi><mo>∈</mo><mi>𝒯</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">C(T(y))\approx C(y),\qquad T\in\mathcal{T},</annotation></semantics></math></p>
+<p>理想carrier不仅要在允许变换下保持稳定，还必须具有足够的信息承载能力、密钥可控性、语义效用和安全性。这里的近似不变量不是“使用了embedding”或“原文检测率高”的同义词，而必须在指定变换和攻击者能力下通过恢复/检测实验或理论保证验证。</p>
+<h3 id="joint-synchronization-and-semantic-robustness">8.2 Joint synchronization and semantic robustness</h3>
+<p>当前研究常把coding/synchronization robustness和semantic-invariant robustness分开处理，但真实攻击可能同时包含：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">edit</mtext><mo>+</mo><mtext mathvariant="normal">sentence reconstruction</mtext><mo>+</mo><mtext mathvariant="normal">paraphrase</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">\text{edit}+\text{sentence reconstruction}+\text{paraphrase}.</annotation></semantics></math></p>
+<p>未来需要把同步定位、结构重建和语义载体联合起来，使接收端先恢复语义单元或结构，再进行消息解码，而不是在token状态完全错位后直接依赖embedding相似度。</p>
+<h3 id="cross-lingual-semantic-invariance">8.3 Cross-lingual semantic invariance</h3>
+<p>翻译不是普通释义。已有跨语言基准开始系统比较不同语言和翻译路径下的水印检测，但结果仍显示KGW、Unigram、XSIR和EXP等代表方法容易受到翻译攻击影响[49]。因此，当前缺口不是“完全没有跨语言评测”，而是缺少经过验证的跨语言稳定carrier、跨语言恢复机制和统一的路径/语言报告。需要单独研究：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Sem</mo><mrow><mo form="prefix" stretchy="true">(</mo><msub><mi>x</mi><mrow><mi>e</mi><mi>n</mi></mrow></msub><mo form="postfix" stretchy="true">)</mo></mrow><mo>↔</mo><mo>Sem</mo><mrow><mo form="prefix" stretchy="true">(</mo><msub><mi>x</mi><mrow><mi>z</mi><mi>h</mi></mrow></msub><mo form="postfix" stretchy="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\operatorname{Sem}(x_{en})\leftrightarrow\operatorname{Sem}(x_{zh})</annotation></semantics></math></p>
+<p>在不同tokenizer、encoder、句法、文化表达和文本领域下，是否存在可以被密钥控制、稳定映射且可恢复的跨语言carrier。中文、日文等无空格语言以及中英混合文本应成为标准测试对象；并应明确区分：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><menclose notation="box"><mrow><mtext mathvariant="normal">Paraphrase Robustness</mtext><mo>≠</mo><mtext mathvariant="normal">Cross-lingual Robustness</mtext></mrow></menclose><mi>.</mi></mrow><annotation encoding="application/x-tex">\boxed{\text{Paraphrase Robustness}\neq\text{Cross-lingual Robustness}}.</annotation></semantics></math></p>
+<h3 id="robustness-under-semantic-preservation-constraints">8.4 Robustness under semantic preservation constraints</h3>
+<p>鲁棒性应与语义和任务效用绑定。对每一种R3或R4攻击，应报告攻击后语义保持度、事实一致性和任务效用，并在同一效用阈值下比较BER、TPR和FPR。只有在<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>T</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>,</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>≥</mo><mi>τ</mi></mrow><annotation encoding="application/x-tex">U(T(y),y)\ge\tau</annotation></semantics></math>的攻击集合内仍能保持较好恢复/检测，才具有应用意义。</p>
+<h3 id="adaptive-robustness-and-carrier-leakage">8.5 Adaptive robustness and carrier leakage</h3>
+<p>如果攻击者可以通过查询学习semantic partition、anchor distribution、paraphraser behavior或watermark vocabulary，那么普通释义下的鲁棒性可能只是规则尚未被学习的结果。未来应将carrier leakage作为独立安全指标，报告查询预算、规则推断精度、scrubbing和spoofing成功率，并区分公开检测器、私有检测器和密钥泄露场景。</p>
+<h3 id="capacityfidelityrobustnesssecurity-trade-off">8.6 Capacity—fidelity—robustness—security trade-off</h3>
+<p>鲁棒性通常需要冗余、重复、ECC、语义锚点或结构表示，这些机制会降低有效容量、增加生成和解码成本，并可能引入可检测模式。安全性还要求carrier难以被攻击者学习和伪造。因此，原有的“容量—隐蔽性—鲁棒性三难”应扩展为四维分析：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">Capacity</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">vs.</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">Imperceptibility/Fidelity</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">vs.</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">Robustness</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">vs.</mtext><mspace width="0.278em"></mspace><mtext mathvariant="normal">Security</mtext></mrow></menclose><annotation encoding="application/x-tex">\boxed{\text{Capacity}\;\text{vs.}\;\text{Imperceptibility/Fidelity}\;\text{vs.}\;\text{Robustness}\;\text{vs.}\;\text{Security}}</annotation></semantics></math></p>
+<p>对隐写而言，capacity和statistical security通常是核心约束；对水印而言，payload较小，可以牺牲容量换取更强的检测和纠错，但不能忽略规则窃取和伪造风险。</p>
+<h3 id="统一基准与中文多语言评测">8.7 统一基准与中文/多语言评测</h3>
+<p>跨语言评测基准已经出现，但不同论文使用的文本长度、模型、采样温度、释义器、翻译路径、阈值、误报率和攻击强度仍差异很大[49]。未来需要在已有基准基础上建立统一的R0—R5攻击套件和A0—A4对手协议，同时覆盖英语、中文、代码、数学、低熵回答、长文和多轮对话。基准应提供原始文本效用、攻击后效用、恢复/检测曲线、语言/路径分层结果和安全攻击成本，而不是只提供一个原始检测准确率。</p>
+<h2 id="结论">9 结论</h2>
+<p>LLM文本鲁棒信息隐藏不是“文本隐写综述”和“文本水印综述”的简单拼接，而是一个共同研究问题：在文本生成和传播过程中，如何选择稳定、可控、难以伪造的信息承载单元，使其经过指定文本变换信道后仍能被恢复或检测。本文建立了统一的嵌入—变换信道—恢复/检测模型，并按token/distribution、position/context、feature/attribute、semantic-space和semantic-structure五类carrier组织方法，同时将black-box/white-box访问条件与generation-time/sampling-time/post-hoc阶段作为独立部署维度。</p>
+<p>从技术演化看，现有工作沿两条并行路径发展：Path A保持token/position/segment等低层carrier，通过冗余、ECC、对齐和同步增强对R0—R2中同步、编辑和位置破坏的抵抗，并可延伸到部分R3/R4场景；Path B提升carrier abstraction，从feature/attribute走向semantic region和semantic structure，主要研究R3/R4表面或语言变化后的carrier保持，但semantic carrier本身也可能因embedding边界、parser error或cross-model drift而失效。两条技术路线不是与攻击层级一一对应，而是提供不同的robustness mechanisms：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">Robustness</mtext><mo>=</mo><mi>f</mi><mrow><mo form="prefix" stretchy="true">(</mo><mtext mathvariant="normal">Carrier</mtext><mo>,</mo><mtext mathvariant="normal">Transformation</mtext><mo>,</mo><mtext mathvariant="normal">Mechanism</mtext><mo>,</mo><mtext mathvariant="normal">Adversary</mtext><mo>,</mo><mtext mathvariant="normal">Utility Constraint</mtext><mo form="postfix" stretchy="true">)</mo></mrow></mrow></menclose><annotation encoding="application/x-tex">\boxed{\text{Robustness}=f(\text{Carrier},\text{Transformation},\text{Mechanism},\text{Adversary},\text{Utility Constraint})}</annotation></semantics></math></p>
+<p>因此，鲁棒信息隐藏的关键不是单纯提高carrier abstraction，而是联合选择carrier、transformation model和robustness mechanism。</p>
+<p>隐写与水印在任务层面仍然不同：隐写要隐藏通信存在并恢复任意消息，水印主要要在低误报率下检测来源或恢复有限身份信息；但二者在机制层面正在共享token采样、语义分区、anchor、ECC、同步和语义结构。未来最关键的问题不是继续罗列更多carrier，而是寻找相对于具体变换信道的robust information-carrying invariant，并联合解决同步、语义保持、跨语言迁移、自适应安全和效用约束下的恢复问题。</p>

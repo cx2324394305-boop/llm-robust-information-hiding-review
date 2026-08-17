@@ -1,0 +1,162 @@
+<h2 id="llm文本鲁棒信息隐藏的统一理论框架">2
+LLM文本鲁棒信息隐藏的统一理论框架</h2>
+<h3 id="嵌入变换信道恢复检测模型">2.1 嵌入—变换信道—恢复/检测模型</h3>
+<p>将原始语境、prompt或待处理文本记为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>，待隐藏信息记为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>，密钥或共享编码状态记为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>。编码器或生成器产生携带信息的文本：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>ℰ</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>x</mi><mo>,</mo><mi>m</mi><mo>,</mo><mi>k</mi><mo form="postfix" stretchy="true">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+y=\mathcal{E}(x,m,k).
+</annotation></semantics></math></p>
+<p>文本发布、传播或被攻击后，接收端获得：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mi>′</mi><mo>=</mo><msub><mi>T</mi><mi>a</mi></msub><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>,</mo><mspace width="2.0em"></mspace><mi>a</mi><mo>∈</mo><mi>𝒜</mi><mo>,</mo><mspace width="1.0em"></mspace><msub><mi>T</mi><mi>a</mi></msub><mo>∈</mo><mi>𝒯</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+y'=T_a(y),\qquad a\in\mathcal{A},\quad T_a\in\mathcal{T}.
+</annotation></semantics></math></p>
+<p>其中<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mi>a</mi></msub><annotation encoding="application/x-tex">T_a</annotation></semantics></math>是由攻击者能力<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>选择或构造的具体文本变换。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>只描述文本发生了什么变化，例如分词、编辑、释义、翻译或摘要；<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝒜</mi><annotation encoding="application/x-tex">\mathcal{A}</annotation></semantics></math>描述攻击者知道多少、能否查询系统以及能否针对规则选择变换。rule
+stealing是对手能力或攻击过程，不是一个独立的transformation
+type。接收端根据<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mi>′</mi></mrow><annotation encoding="application/x-tex">y'</annotation></semantics></math>、密钥和必要的上下文执行恢复或检测：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>m</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝒟</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mi>′</mi><mo>,</mo><mi>k</mi><mo form="postfix" stretchy="true">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\hat{m}=\mathcal{D}(y',k).
+</annotation></semantics></math></p>
+<p>鲁棒信息隐藏的基本目标是，在允许的变换集合<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>和攻击者能力集合<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝒜</mi><annotation encoding="application/x-tex">\mathcal{A}</annotation></semantics></math>下，使：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo form="prefix" stretchy="true">[</mo><mi>𝒟</mi><mrow><mo form="prefix" stretchy="true">(</mo><msub><mi>T</mi><mi>a</mi></msub><mrow><mo form="prefix" stretchy="true">(</mo><mi>ℰ</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>x</mi><mo>,</mo><mi>m</mi><mo>,</mo><mi>k</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo form="postfix" stretchy="true">)</mo></mrow><mo>,</mo><mi>k</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>=</mo><mi>m</mi><mo form="postfix" stretchy="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+\Pr\left[\mathcal{D}\left(T_a(\mathcal{E}(x,m,k)),k\right)=m\right]
+</annotation></semantics></math></p>
+<p>保持足够高，或者使检测统计量在攻击后仍然能够区分“携带信息”和“未携带信息”的文本。这里的“足够高”不能脱离任务目标、误报率、文本长度和变换后的文本效用单独定义。</p>
+<h3 id="隐写和水印在统一模型中的位置">2.2
+隐写和水印在统一模型中的位置</h3>
+<p>对于文本隐写，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>通常是任意长度的秘密比特流，解码器需要恢复消息本身。因此重点指标包括：</p>
+<ul>
+<li><strong>BER（bit error rate）：</strong> 攻击后比特错误比例；</li>
+<li><strong>exact recovery：</strong> 消息是否完全恢复；</li>
+<li><strong>message recovery rate：</strong>
+在多条消息或多段文本上的恢复比例；</li>
+<li><strong>capacity：</strong>
+单位token、词、句子或文本能够承载的信息量；</li>
+<li><strong>steganographic security：</strong>
+隐写文本是否容易被检测出存在通信。</li>
+</ul>
+<p>对于文本水印，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>可以是零比特存在性信号，也可以是有限长度的模型ID、用户ID、时间戳或来源信息。零比特水印可写为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mi>′</mi><mo>,</mo><mi>k</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo>∈</mo><mo form="prefix" stretchy="false">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo form="postfix" stretchy="false">}</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+D(y',k)\in\{0,1\},
+</annotation></semantics></math></p>
+<p>其主要目标不是恢复高容量任意消息，而是在给定误报率和文本变换信道下保留可靠检测证据。多比特水印则介于零比特水印与受限隐写之间：它需要恢复结构化载荷，但载荷空间、长度和应用语义通常被预先限制。</p>
+<p>因此，Steganography和Watermarking在任务目标和payload上不同，但从鲁棒机制看都在解决同一个基本问题：如何选择一种信息载体，使文本经过允许的transformation
+channel后，承载的信息仍然可以恢复或检测。</p>
+<h3 id="四个需要区分的基本属性">2.3 四个需要区分的基本属性</h3>
+<h4 id="capacity">Capacity</h4>
+<p>Capacity表示可承载的信息量，例如bits/token、bits/word、bits/sentence或固定长度ID的有效编码率。隐写通常需要较高容量，因为秘密消息可能具有较长和不可预先压缩的内容；零比特水印的容量要求最低，多比特水印需要在容量、错误率和检测可靠性之间权衡。</p>
+<h4 id="imperceptibility-fidelity">Imperceptibility / Fidelity</h4>
+<p>Imperceptibility强调隐藏信号不容易被观察者或统计检测器发现；Fidelity强调嵌入或后处理没有明显破坏文本的语义、语言质量和原任务效用。二者相关但不完全相同：分布统计上的不可检测不代表事实、逻辑和任务目标保持，也不代表攻击后信息可以恢复。</p>
+<h4 id="robustness">Robustness</h4>
+<p>Robustness表示在特定文本变换<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>下信息仍能被恢复或检测。它必须回答“对什么变换鲁棒”：对tokenizer变化鲁棒，不等于对释义鲁棒；对随机删除鲁棒，不等于对自适应释义鲁棒；对同语言释义鲁棒，也不等于对翻译和回译鲁棒。</p>
+<h4 id="security">Security</h4>
+<p>Security描述攻击者能否发现隐藏信号、学习水印规则、恢复密钥、伪造带水印文本（spoof/forge）或擦除水印（scrub）。安全性取决于对手能力、查询预算和密钥模型。对被动隐写分析者的统计不可区分性不等于对主动修改者的鲁棒性；同样，语义水印在普通释义后可检测，也不等于其分区和anchor对自适应攻击者保密。</p>
+<p>水印在释义攻击下的可靠性、鲁棒性评测和规则泄露问题也已有专门研究[39-41]。因此，本文始终区分：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">Security</mtext><mo>≠</mo><mtext mathvariant="normal">Robustness</mtext></mrow></menclose><annotation encoding="application/x-tex">
+\boxed{\text{Security}\neq\text{Robustness}}
+</annotation></semantics></math></p>
+<h3 id="两个正交维度变换信道与对手能力">2.4
+两个正交维度：变换信道与对手能力</h3>
+<p>鲁棒性分类和攻击者分类不能放在同一个层级。前者描述文本发生了什么变换，后者描述谁能实施变换以及掌握什么信息。</p>
+<h4 id="dimension-atransformation-channel">Dimension A：Transformation
+Channel</h4>
+<p>本文采用以下变换信道分层：</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>层级</th>
+<th>变换类型</th>
+<th>典型操作</th>
+<th>主要破坏对象</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>R0</td>
+<td>Representation transformation</td>
+<td>tokenizer、Unicode、空格、大小写、序列化</td>
+<td>token对齐、确定性解码状态、字符/词边界</td>
+</tr>
+<tr class="even">
+<td>R1</td>
+<td>Local editing</td>
+<td>插入、删除、替换、局部重排</td>
+<td>token身份、位置、局部同步、自回归状态</td>
+</tr>
+<tr class="odd">
+<td>R2</td>
+<td>Structural transformation</td>
+<td>句子拆分、合并、重排、片段重构</td>
+<td>句子边界、位置编码、分段分配、上下文窗口</td>
+</tr>
+<tr class="even">
+<td>R3</td>
+<td>Semantic-preserving transformation</td>
+<td>同义替换、LLM释义、句法重写、风格保持改写</td>
+<td>词汇载体、token概率模式、表层句法；原则上保留核心语义</td>
+</tr>
+<tr class="odd">
+<td>R4</td>
+<td>Cross-lingual transformation</td>
+<td>翻译、回译、跨语言改写</td>
+<td>词汇、句法、tokenizer、句子结构和文化表达</td>
+</tr>
+<tr class="even">
+<td>R5</td>
+<td>Information-deleting transformation</td>
+<td>摘要、压缩、删节、内容筛选</td>
+<td>部分命题、细节、句子结构和可能的隐藏载荷</td>
+</tr>
+</tbody>
+</table>
+<p>R5不应与普通paraphrase完全等同。摘要可以保持主题或大意，却可能删除承载信息所需的命题和细节，因此它通常不是严格的meaning-preserving
+transformation。</p>
+<h4 id="dimension-badversary-capability">Dimension B：Adversary
+Capability</h4>
+<p>攻击者能力可分为：</p>
+<ul>
+<li><strong>A0 oblivious/non-adaptive attacker：</strong>
+不知道水印规则或编码器，仅执行预先固定的编辑/释义；</li>
+<li><strong>A1 black-box adaptive attacker：</strong>
+能查询生成或水印系统，但看不到内部logits和密钥；</li>
+<li><strong>A2 query-based rule-stealing attacker：</strong>
+利用大量查询学习anchor、语义分区、释义器差异或检测边界；</li>
+<li><strong>A3 white-box attacker：</strong>
+知道模型、编码过程或检测器结构，但不一定拥有密钥；</li>
+<li><strong>A4 key-compromised attacker：</strong>
+获得密钥或等价规则，可主动伪造和擦除。</li>
+</ul>
+<p>例如，“自适应释义”应描述为“R3语义保持变换+A1黑盒自适应攻击”，而不应作为与R0—R4同层级的鲁棒性类别。</p>
+<h3 id="deployment-and-access-dimensions">2.5 Deployment and Access
+Dimensions</h3>
+<p>访问条件和嵌入阶段是独立于information
+carrier的部署维度。它们决定了carrier如何构造、发送端需要哪些模型信息，以及接收端能否复现检测过程。</p>
+<p><strong>Access condition：</strong></p>
+<ul>
+<li><strong>White-box/logits-access：</strong>
+可以访问模型logits、token概率或采样过程；</li>
+<li><strong>Gray-box：</strong>
+可以访问部分模型状态、隐藏表示或受限接口；</li>
+<li><strong>Black-box/API-only：</strong>
+只能提交prompt或文本并获得模型输出，不能访问logits和内部状态；</li>
+<li><strong>Detector-only：</strong>
+检测器只接收文本和密钥，甚至不需要原始生成模型。</li>
+</ul>
+<p><strong>Embedding stage：</strong></p>
+<ul>
+<li><strong>Generation-time：</strong>
+在LLM生成文本时控制语义、关键词、句子或候选输出；</li>
+<li><strong>Sampling-time：</strong>
+在token采样、概率分布或随机数映射阶段嵌入信息；</li>
+<li><strong>Post-hoc rewriting：</strong>
+文本生成后，通过词汇替换、释义、anchor或外部改写器注入信息。</li>
+</ul>
+<p>例如，LLM-Stega属于<code>[Black-box][Generation-time]</code>，但其carrier仍应按keyword/feature归类；PostMark和COLING
+2025后处理水印属于<code>[Black-box][Post-hoc]</code>，但其carrier是semantic/syntactic
+anchor；paraphraser-based multi-bit
+watermark属于<code>[Black-box][Post-hoc]</code>或<code>[Black-box][Generation-time]</code>的改写流程，其真正carrier是释义器行为差异。访问条件和嵌入阶段不应在第3节中作为与token、semantic
+region或semantic structure并列的carrier类别。</p>

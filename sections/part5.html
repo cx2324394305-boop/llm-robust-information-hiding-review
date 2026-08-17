@@ -1,0 +1,92 @@
+<h2 id="统一机制比较与代表方法分析">5 统一机制比较与代表方法分析</h2>
+<h3 id="代表方法比较表">5.1 代表方法比较表</h3>
+<p>下表以论文明确讨论或评测的内容为准。<code>—</code>表示未在论文中确认该攻击被系统评测，不代表方法无法抵抗，也不代表方法鲁棒；<code>✓ (empirical)</code>表示论文有对应实验，<code>✓ (theoretical)</code>表示主要有理论保证，<code>Partial</code>表示仅覆盖部分攻击或存在限定条件。Access和Embedding
+Stage是部署维度，不是carrier类别。Carrier表示信息直接依附的文本/生成属性；Robustness
+Mechanism表示使该carrier在攻击后仍能恢复或检测的手段，二者不是同一分类轴。例如，Kuditipudi的carrier仍是random
+sequence/token
+sampling，但其机制是alignment；SemStamp的carrier是semantic
+region，其机制包括LSH partition、margin和rejection sampling。</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+<col style="width: 6%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th><th>Task</th><th>Carrier</th><th>Granularity</th><th>Robustness Mechanism</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>Payload</th><th>Access</th><th>Embedding Stage</th><th>Security Goal</th><th>Main Failure Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd"><td>Neural Linguistic Steganography [1]</td><td>Steganography</td><td>token probability / arithmetic interval</td><td>token</td><td>distribution matching</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>sampling-time</td><td>统计隐蔽</td><td>token、模型和上下文不同步</td></tr>
+<tr class="even"><td>patient-Huffman [2]</td><td>Steganography</td><td>token probability / Huffman code</td><td>token</td><td>概率编码</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>sampling-time</td><td>降低分布差异</td><td>局部错误造成解码级联偏移</td></tr>
+<tr class="odd"><td>Self-adjusting arithmetic coding [3]</td><td>Steganography</td><td>token probability</td><td>token</td><td>自调整概率编码</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>sampling-time</td><td>低KL和高容量</td><td>依赖精确自回归状态</td></tr>
+<tr class="even"><td>Meteor / ADG / MEC / Discop [4-7]</td><td>Steganography</td><td>sampling randomness / distribution copies</td><td>token/采样</td><td>密码学或信息论分布保持</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>sampling-time</td><td>被动统计或计算安全</td><td>主动修改未必保留解码状态</td></tr>
+<tr class="odd"><td>SparSamp / RRC / SA-ANS [8,9,42]</td><td>Steganography</td><td>sparse sampling / range or ANS state</td><td>token/采样</td><td>熵利用率与编码效率</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>sampling-time</td><td>分布不可感知与效率</td><td>低熵、修改和同步问题</td></tr>
+<tr class="even"><td>KGW [20]</td><td>Zero-bit Watermark</td><td>keyed green/red token partition</td><td>token</td><td>统计聚合</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0 bit</td><td>white-box/logits；detector-only检测</td><td>sampling-time</td><td>来源检测</td><td>前文hash、短文本和改写敏感</td></tr>
+<tr class="odd"><td>Kuditipudi et al. [22]</td><td>Zero-bit Watermark</td><td>keyed random sequence / sampled token sequence</td><td>token/sequence</td><td>alignment、distortion-free sampling</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>Partial (empirical)</td><td>Partial (round-trip translation)</td><td>0 bit</td><td>white-box/logits嵌入；detector-only检测</td><td>sampling-time</td><td>低失真来源检测</td><td>低熵回答和自动释义降低检测率</td></tr>
+<tr class="even"><td>Unigram/GPTWatermark [23]</td><td>Zero-bit Watermark</td><td>fixed token groups / unigram bias</td><td>token</td><td>固定分组、理论鲁棒性</td><td>—</td><td>Partial</td><td>—</td><td>Partial</td><td>—</td><td>0 bit</td><td>white-box/logits</td><td>sampling-time</td><td>检测与一定编辑鲁棒</td><td>token carrier仍受语义改写影响</td></tr>
+<tr class="odd"><td>Edit-distance watermark [24]</td><td>Zero-bit/limited-bit</td><td>edit-distance code</td><td>token/字符序列</td><td>编辑距离编码</td><td>—</td><td>✓ (theoretical)</td><td>—</td><td>—</td><td>—</td><td>有限载荷</td><td>white-box/logits；detector-only检测</td><td>sampling-time</td><td>编辑信道下的可检测性</td><td>理论信道与实际LLM差异</td></tr>
+<tr class="even"><td>Stepwise Verification / Post-hoc Rollback [16]</td><td>Steganography / Watermarking</td><td>existing token-level carrier / token boundary</td><td>token/step</td><td>steganography: stepwise verification；watermarking: post-hoc rollback</td><td>✓ (empirical)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>依任务</td><td>not clearly specified</td><td>generation-time / post-hoc</td><td>修复重分词导致的提取失败</td><td>only addresses tokenization/step inconsistency; stronger edits and rewrites may still desynchronize or erase the signal</td></tr>
+<tr class="odd"><td>ASW [15]</td><td>Steganography</td><td>anchored context / sliding window</td><td>context/window</td><td>同步、bridge context、自蒸馏</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>generation-time</td><td>鲁棒且不可感知生成</td><td>仍依赖上下文锚定和模型条件</td></tr>
+<tr class="even"><td>STEAD [47]</td><td>Steganography</td><td>robust positions / diffusion sampling state</td><td>position/token</td><td>RPE+ECC、pseudo-random correction、neighborhood search</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>—</td><td>Partial (word synonym)</td><td>—</td><td>任意比特流</td><td>white-box/logits</td><td>generation-time</td><td>可证明安全与主动编辑鲁棒</td><td>DLM位置依赖、容量—鲁棒性折衷</td></tr>
+<tr class="odd"><td>RBC watermark [48]</td><td>Zero-bit Watermark</td><td>coded token/sampling signal</td><td>token/sequence</td><td>robust binary code / ECC</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>0 bit</td><td>white-box/logits；detector-only检测</td><td>sampling-time</td><td>低失真与跨语言检测</td><td>code长度、语言和攻击路径影响检测</td></tr>
+<tr class="even"><td>LLM-Stega [10]</td><td>Steganography</td><td>keyword set / encrypted mapping</td><td>keyword</td><td>黑盒拒绝采样</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>任意比特流</td><td>black-box</td><td>generation-time</td><td>黑盒隐蔽通信</td><td>API变化、prompt和关键词不稳定</td></tr>
+<tr class="odd"><td>Semantic Steganography [11]</td><td>Steganography</td><td>ontology/entity semantic region</td><td>semantic region</td><td>语义区域编码</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>高容量比特流</td><td>not clearly specified</td><td>generation-time</td><td>语义空间隐写</td><td>分区边界、encoder和领域依赖</td></tr>
+<tr class="even"><td>MMLS [12]</td><td>Steganography</td><td>syntax pattern + lexical substitution</td><td>sentence/word</td><td>多粒度句法和词汇修改</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>多粒度比特流</td><td>not clearly specified</td><td>post-hoc/generation-time</td><td>不可感知和容量</td><td>属性/句法修改可能暴露结构</td></tr>
+<tr class="odd"><td>Sentence attribute encoding [13]</td><td>Steganography</td><td>sentence attribute</td><td>sentence</td><td>属性分析与释义调整</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>属性编码</td><td>not clearly specified</td><td>post-hoc</td><td>提取效率和文本质量</td><td>属性分类边界与改写稳定性</td></tr>
+<tr class="even"><td>Perry Weak-Robust Construction [14]</td><td>Steganography</td><td>keyed token-distribution perturbation</td><td>token/sequence</td><td>multi-watermark statistical inference、salting、dynamic key selection</td><td>—</td><td>✓ (empirical)</td><td>Partial (empirical)</td><td>—</td><td>—</td><td>任意消息</td><td>white-box/logits</td><td>sampling-time</td><td>locally consistent tampering下恢复</td><td>token distribution、局部编辑和低熵文本限制鲁棒性</td></tr>
+<tr class="odd"><td>Perry Strong-Robust Construction [14]</td><td>Steganography</td><td>text embedding / LSH region</td><td>semantic chunk</td><td>LSH、rejection sampling、repetition/convolutional coding</td><td>—</td><td>Partial (empirical)</td><td>Partial (empirical)</td><td>✓ (empirical)</td><td>—</td><td>任意消息</td><td>not clearly specified; API-compatible generation demonstrated</td><td>generation-time</td><td>semantic-preserving paraphrase下恢复</td><td>embedding drift、重采样成本和攻击者适应</td></tr>
+<tr class="even"><td>Semantic Invariant [25]</td><td>Zero-bit Watermark</td><td>semantic representation-derived logits</td><td>context/sentence</td><td>语义表示驱动</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>white-box/logits</td><td>sampling-time</td><td>抗同义替换/释义</td><td>embedding漂移和跨模型依赖</td></tr>
+<tr class="odd"><td>SemStamp [26]</td><td>Zero-bit Watermark</td><td>sentence embedding + LSH region</td><td>sentence/region</td><td>LSH、margin、rejection sampling</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>not clearly specified</td><td>generation-time</td><td>释义后检测</td><td>随机分区边界和语义碰撞</td></tr>
+<tr class="even"><td>k-SemStamp [46]</td><td>Zero-bit Watermark</td><td>sentence embedding + k-means semantic region</td><td>sentence/region</td><td>cluster-aware partition、rejection sampling</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>not clearly specified</td><td>generation-time</td><td>释义检测与采样效率</td><td>domain cluster、encoder和跨语言依赖</td></tr>
+<tr class="odd"><td>SemaMark [27]</td><td>Zero-bit Watermark</td><td>semantic feature</td><td>sentence/context</td><td>语义特征替代token hash</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>not clearly specified</td><td>generation-time</td><td>抗释义检测</td><td>语义特征稳定性</td></tr>
+<tr class="even"><td>PASA [51]</td><td>Zero-bit Watermark</td><td>latent semantic cluster + keyed semantic history</td><td>token/context</td><td>shared randomness、semantic clustering、distortion-free sampling</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>white-box/logits</td><td>sampling-time</td><td>强释义下检测</td><td>cluster boundary、history和自适应查询</td></tr>
+<tr class="odd"><td>DEW [52]</td><td>Zero-bit Watermark</td><td>contextual + token-level semantic embeddings</td><td>token/context</td><td>keyed projection、dual semantic signal</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>0 bit</td><td>white-box/logits</td><td>sampling-time</td><td>释义与翻译后检测</td><td>embedding/投影依赖、预印本验证范围</td></tr>
+<tr class="even"><td>SWAN [28]</td><td>Zero-bit Watermark</td><td>AMR / semantic structure</td><td>structure</td><td>结构不变、AMR检测</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>not clearly specified；prompt-based</td><td>generation-time</td><td>保义释义下检测</td><td>parser error、结构重建和容量</td></tr>
+<tr class="odd"><td>SemanticShift [29]</td><td>Zero-bit Watermark</td><td>semantic shift / keyed candidates</td><td>semantic/token</td><td>语义漂移与密钥控制</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>not clearly specified</td><td>generation-time</td><td>训练自由语义检测</td><td>语义边界和自适应查询</td></tr>
+<tr class="even"><td>KR-stega [50]</td><td>Steganography</td><td>keyword + word-semantic LSH partition</td><td>keyword/feature</td><td>keyword conditioning、LSH、imperceptible sampling</td><td>—</td><td>—</td><td>—</td><td>Partial (public record)</td><td>—</td><td>任意消息</td><td>not clearly specified</td><td>generation-time</td><td>抗释义与抗隐写分析</td><td>keyword选择、LSH边界和容量</td></tr>
+<tr class="odd"><td>PostMark [30]</td><td>Zero-bit Watermark</td><td>input-dependent semantic anchor words</td><td>post-hoc word</td><td>黑盒后处理、语义anchor</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>black-box</td><td>post-hoc</td><td>黑盒来源检测</td><td>anchor删除和文本修改</td></tr>
+<tr class="even"><td>Waterfall [31]</td><td>Zero-bit Watermark</td><td>paraphraser-induced textual signal</td><td>rewritten text</td><td>LLM释义器后处理</td><td>—</td><td>—</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>0 bit</td><td>black-box</td><td>post-hoc</td><td>可扩展来源与溯源</td><td>改写成本、模型更新和规则暴露</td></tr>
+<tr class="odd"><td>COLING post-hoc [32]</td><td>Zero-bit Watermark</td><td>semantic/syntactic anchor words</td><td>word/sentence</td><td>anchor替换与后处理</td><td>—</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>0 bit</td><td>black-box</td><td>post-hoc</td><td>抗多类改写检测</td><td>关键anchor被删除或规则泄露</td></tr>
+<tr class="even"><td>Balance-Marking [33]</td><td>Multi-bit Watermark</td><td>balanced token partitions</td><td>token/segment</td><td>概率平衡、多比特编码</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>多比特</td><td>white-box/logits</td><td>sampling-time</td><td>用户/信息追踪</td><td>载荷增大导致检测和质量下降</td></tr>
+<tr class="odd"><td>Position allocation [34]</td><td>Multi-bit Watermark</td><td>position/segment allocation</td><td>segment</td><td>分段定位与局部恢复</td><td>—</td><td>✓ (empirical)</td><td>✓ (empirical)</td><td>—</td><td>—</td><td>多比特</td><td>white-box/logits嵌入；detector-only提取</td><td>generation-time</td><td>不访问原模型的提取</td><td>分段错位和局部删除</td></tr>
+<tr class="even"><td>Paraphraser-based multi-bit [35]</td><td>Multi-bit Watermark</td><td>paraphraser behavior</td><td>sentence/segment</td><td>一对释义器+分类器</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>多比特</td><td>black-box</td><td>post-hoc</td><td>释义后消息恢复</td><td>释义器漂移、查询和伪造</td></tr>
+<tr class="odd"><td>Provably robust multi-bit [36]</td><td>Multi-bit Watermark</td><td>pseudorandom segments</td><td>segment</td><td>分段、ECC、均衡分配</td><td>—</td><td>✓ (theoretical/empirical)</td><td>✓ (empirical)</td><td>—</td><td>—</td><td>20-bit等有限载荷</td><td>not clearly specified</td><td>generation-time</td><td>用户ID追踪</td><td>短文本容量和编辑预算</td></tr>
+<tr class="even"><td>SynthID-Text [37,38]</td><td>Zero-bit Watermark</td><td>tournament-sampling statistic</td><td>token/statistic</td><td>生产级采样和统计检测</td><td>—</td><td>✓ (empirical)</td><td>—</td><td>✓ (empirical)</td><td>Partial (official limitation)</td><td>0 bit</td><td>white-box/logits嵌入；detector-only检测</td><td>sampling-time</td><td>大规模来源识别</td><td>重写/翻译降低置信度</td></tr>
+</tbody>
+</table>
+<h3 id="表格反映出的技术演化">5.2 表格反映出的技术演化</h3>
+<p>第一，carrier的演化不是单一的“由低层向高层上移”，而是两条路径并行发展。Path
+A保持token/position/segment
+carrier，通过ECC、冗余、alignment和synchronization增强对R0—R2中同步、编辑和位置破坏的抵抗，代表方法包括Kuditipudi、ASW、STEAD、RBC和多比特分段编码；其中RBC和Kuditipudi说明低层编码机制也可以延伸到部分R4或语义改写场景。Path
+B提升carrier abstraction，从feature/attribute走向semantic
+region和semantic
+structure，主要研究R3/R4表面或语言变化后高层carrier能否保持，代表方法包括SemStamp、k-SemStamp、PASA、DEW和SWAN。</p>
+<p>第二，carrier
+abstraction上移并不等于所有指标同时改善。高层carrier可能提高R3释义鲁棒性，但会降低容量、增加编码器依赖，并引入semantic
+collision和parser
+error；低层carrier通常具有较高容量和较清晰的统计分析，但容易受到R0—R2同步破坏和R3表层重写。相反，某一transformation也不对应唯一机制：翻译可以由semantic/structure
+carrier应对，也可以由distributed coded token/segment
+carrier与ECC或translation-aware
+detection应对；同样，ECC既可服务于编辑信道，也可能参与跨语言检测。</p>
+<p>第三，两条路径最终都指向robust information-carrying
+invariant，但该不变量应理解为相对于指定transformation、adversary和utility
+constraint的近似不变量，而不是某个carrier天然拥有的属性。ECC、冗余和同步解决的是信号如何在低层载体上存活；semantic
+region和AMR解决的是载体是否在语义变换后仍然存在；密钥管理、查询限制和私有检测器才涉及A1—A4攻击者下的安全性。未来更可能是这些机制的联合设计，而不是单独追求更高的carrier
+abstraction：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">Robustness</mtext><mo>=</mo><mi>f</mi><mrow><mo form="prefix" stretchy="true">(</mo><mtext mathvariant="normal">Carrier</mtext><mo>,</mo><mtext mathvariant="normal">Transformation</mtext><mo>,</mo><mtext mathvariant="normal">Mechanism</mtext><mo>,</mo><mtext mathvariant="normal">Adversary</mtext><mo>,</mo><mtext mathvariant="normal">Utility Constraint</mtext><mo form="postfix" stretchy="true">)</mo></mrow></mrow></menclose><annotation encoding="application/x-tex">
+\boxed{\text{Robustness}=f(\text{Carrier},\text{Transformation},\text{Mechanism},\text{Adversary},\text{Utility Constraint})}
+</annotation></semantics></math></p>

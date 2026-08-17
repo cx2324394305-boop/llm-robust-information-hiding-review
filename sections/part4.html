@@ -1,0 +1,134 @@
+<h2 id="transformationmechanism-mapping">4 Transformation–Mechanism
+Mapping</h2>
+<p>上一节按carrier组织方法，本节不再逐篇重复介绍论文，而是把文本变换信道与可用鲁棒机制显式映射起来：攻击破坏什么属性，哪些机制适合修复，哪些carrier通常能够承载这些机制。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Transformation</th>
+<th>Main Destroyed Property</th>
+<th>Suitable Robustness Mechanism</th>
+<th>Typical Carrier</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>R0 Representation</td>
+<td>token boundary、deterministic decoding state</td>
+<td>normalization、stepwise verification、rollback、synchronization</td>
+<td>token</td>
+</tr>
+<tr class="even">
+<td>R1 Edit</td>
+<td>position、sequence alignment、bit alignment</td>
+<td>redundancy、ECC、edit-distance coding、alignment</td>
+<td>token/segment</td>
+</tr>
+<tr class="odd">
+<td>R2 Structural</td>
+<td>segmentation、sentence boundary、context window</td>
+<td>resynchronization、segment-independent coding、sliding window</td>
+<td>segment/context</td>
+</tr>
+<tr class="even">
+<td>R3 Paraphrase</td>
+<td>lexical and syntactic carrier</td>
+<td>semantic invariant、feature stability、structural invariant</td>
+<td>semantic/feature/structure</td>
+</tr>
+<tr class="odd">
+<td>R4 Translation</td>
+<td>lexical choice、syntax、tokenizer、language-specific
+representation</td>
+<td>cross-lingual invariant、distributed coding、ECC、translation-aware
+alignment/detection</td>
+<td>semantic/structure；distributed coded token/segment carrier</td>
+</tr>
+<tr class="even">
+<td>R5 Deletion</td>
+<td>information-bearing units</td>
+<td>redundancy、distributed coding、message shortening or partial
+recovery</td>
+<td>multi-unit/segment</td>
+</tr>
+</tbody>
+</table>
+<p>表中机制是适配关系而不是自动保证。比如ECC能够修复部分编辑错误，但不能保证翻译后语义载体仍在；semantic
+embedding有机会抵抗释义，但不自动解决tokenization或句子分段；translation-aware检测也不等于carrier已经跨语言不变。</p>
+<h3 id="r0表示变换信道">4.1 R0：表示变换信道</h3>
+<p>R0包括tokenizer不一致、Unicode变体、空格、大小写、标点、序列化和平台格式化。它们可能不改变人类理解的内容，却会改变接收端看到的字符、词边界和token序列。对token概率隐写而言，R0会改变概率索引和自回归状态；对KGW类水印而言，R0会改变前文hash、green-list命中和统计计数；对语义空间方法而言，如果句子文本本身不变，语义carrier可能相对稳定，但不同encoder和归一化流程仍可能产生数值差异。</p>
+<p>tokenization
+inconsistency工作直接说明了R0对提取的影响[16]。因此，任何声称“模型无关”或“黑盒鲁棒”的方法，都应说明接收端是否重新分词、使用何种tokenizer以及平台序列化变化是否被纳入测试。</p>
+<h3 id="r1局部编辑信道">4.2 R1：局部编辑信道</h3>
+<p>R1包括插入、删除和替换。它们破坏token
+identity、position和局部同步；对于自回归隐写，一个删除可能使后续bit流全部错位；对于统计水印，编辑可能降低green-token比例或打断连续统计证据；对于多比特水印，局部错误还可能造成分段定位失败。</p>
+<p>冗余、多位置嵌入和统计聚合可以使局部编辑不至于完全删除信号；ECC和edit-distance
+coding可以修复部分bit错误[22,24,36]；position
+allocation和伪随机分段可以减轻局部片段损坏对整个消息的影响[34,36]。但这些机制仍依赖载体在文本中留下足够多的冗余，通常会降低有效容量或增加文本修改量。</p>
+<h3 id="r2结构变换信道">4.3 R2：结构变换信道</h3>
+<p>句子拆分、合并、重排和chunk重构会改变句子边界、位置编码、分段归属和上下文窗口。它们可能保持大部分语义，却破坏依赖句子位置或段落编号的载体。ASW的滑动窗口和bridge
+context可以被理解为一种同步鲁棒机制：通过保留可重建的上下文锚点，降低局部结构变化带来的状态漂移[15]。多比特方法的分段定位也试图让信息不完全依赖单一固定位置[34,36]。</p>
+<p>结构变换对语义carrier的影响并非总是较小。句子拆分可能使一个语义单元变为多个向量，句子合并可能改变embedding或semantic
+cluster，摘要则可能直接删除承载信息的事件和实体。因此，需要把“结构保持但表层变化”和“信息删除型结构重构”分别评估。</p>
+<h3 id="r3语义保持变换信道">4.4 R3：语义保持变换信道</h3>
+<p>R3包括同义替换、LLM释义、句法重写和风格保持改写。它们通常改变词汇和表层句法，同时试图保留核心语义，是检验semantic
+robustness的主要信道。</p>
+<p>token级方法容易受到R3影响，因为词汇选择、上下文token和局部概率模式会发生变化。语义空间、sentence
+attribute、keyword和semantic
+structure方法试图把信息绑定到更稳定的属性上[11-13,25-29]。但这种稳定性只是相对于具体encoder、数据领域和攻击强度的近似不变量：语义embedding可能跨越分区边界，属性可能被改写，关键词可能被删除，AMR可能被解析错误。</p>
+<p>Perry等人将LLM鲁棒隐写形式化为两种不同威胁模型：weak
+robustness要求对局部一致的<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo form="prefix" stretchy="true">(</mo><mi>k</mi><mo>,</mo><mi>ϵ</mi><mo form="postfix" stretchy="true">)</mo></mrow><annotation encoding="application/x-tex">(k,\epsilon)</annotation></semantics></math>
+tampering保持消息恢复，strong
+robustness要求在语义保持且embedding距离不超过阈值<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>的改写下恢复[14]。对应地，weak
+construction通过多组keyed token-distribution
+perturbation、统计推断、salting和动态key selection编码消息；strong
+construction则把消息分块映射到text-embedding/LSH区域，通过rejection
+sampling生成候选文本，并在实现中使用repetition/convolutional
+codes缓解LSH误差。其攻击套件包括n-gram shuffle、synonym
+substitution和LLM
+paraphrase，并区分局部与全局攻击。因此，Perry不能被简单归为单一semantic
+method，而应视为同一论文中并列的token-distribution weak
+construction与semantic-embedding strong construction。Hidden in Plain
+Text则说明，经过强化学习或上下文学习优化的LLM隐写可能形成对释义防御具有鲁棒性的通信策略[19]。这些结果共同表明，固定使用一个释义模型作为“去隐写/去水印器”并不能构成充分的安全保证；攻击者和发送者都可以利用更高层的语义、句法、风格或交互结构。</p>
+<h3 id="r4跨语言变换信道">4.5 R4：跨语言变换信道</h3>
+<p>翻译和回译不应与普通paraphrase完全混合。跨语言变换同时改变词汇、句法、tokenizer、句子结构和文化表达，可能保留主题和命题，却不保留原始语言的局部语义特征或结构解析结果。跨语言评测已经开始出现：Al
+Ghanim等人在Findings of EMNLP
+2025中比较了KGW、Unigram、XSIR和EXP在英语、阿拉伯语、中文和印度尼西亚语等语言及实际翻译攻击下的表现，并进一步讨论了非对称跨语言攻击[49]。该研究显示，不同语言路径会造成显著的检测差异，现有方法总体仍易受到翻译攻击影响；因此当前的研究缺口已经从“是否评测跨语言”转向“是否设计了跨语言稳定的information
+carrier和恢复机制”。</p>
+<p>SynthID-Text的官方技术说明明确提示，重写或翻译会降低检测置信度[38]。这说明生产级部署和跨语言鲁棒之间仍有明显差距。未来需要研究跨语言共享的semantic
+carrier，并分别报告翻译质量、语义一致性和攻击后恢复/检测性能。换言之，跨语言鲁棒性评测的空白正在缩小，但跨语言不变量设计和跨语言恢复机制仍然有限。</p>
+<h3 id="r5信息删除型变换">4.6 R5：信息删除型变换</h3>
+<p>摘要、压缩、删节和内容筛选会主动减少文本承载的信息量。即使摘要保留主旨，也可能删除隐写消息对应的命题、关键词、句子属性或语义结构。对零比特水印而言，摘要可能保留主题级统计证据，也可能把触发检测的细粒度载体完全删除；对任意消息隐写而言，摘要通常不能被视为普通语义保持信道，除非系统在设计时引入了跨句子冗余和可恢复的摘要不变量。</p>
+<h3 id="mechanism-components">4.7 Mechanism components</h3>
+<h4 id="redundancy-robustness">4.7.1 Redundancy robustness</h4>
+<p>冗余鲁棒性通过重复、多位置嵌入、跨句子聚合或统计计数，使局部修改不至于完全删除信息。它适合零比特检测和短ID追踪，但会降低有效容量，并可能引入重复结构，增加隐写分析风险。多比特水印的分段重复和局部投票属于这一类[34,36]。</p>
+<h4 id="error-correction-robustness">4.7.2 Error-correction
+robustness</h4>
+<p>ECC、edit-distance
+coding和纠错解码把局部token或bit错误转化为可修复误差。其有效性取决于攻击强度是否低于编码距离，以及错误是否近似独立；对于插入/删除造成的bit-slippage，仅有传统bit级纠错通常不够，还需要同步标记、分段定位或编辑距离模型[22,24,36]。</p>
+<h4 id="synchronization-robustness">4.7.3 Synchronization
+robustness</h4>
+<p>同步鲁棒性解决插入、删除、重分词和长上下文状态漂移问题。sliding
+window、anchored context、stepwise verification和position-independent
+decoding都试图在攻击后重新定位编码状态[15,16,34]。这类机制主要增强R0—R2鲁棒性，不应自动被称为语义鲁棒。</p>
+<h4 id="semantic-invariant-robustness">4.7.4 Semantic-invariant
+robustness</h4>
+<p>语义不变鲁棒性把信息绑定到paraphrase后相对稳定的semantic
+embedding、semantic cluster、keyword、sentence
+attribute或语义区域[11,13,25-27,29]。其关键不是“是否使用语义信息”，而是载体在目标R3变换下是否保持足够稳定，并且接收端能在embedding边界扰动下可靠解码。</p>
+<h4 id="structural-invariant-robustness">4.7.5 Structural-invariant
+robustness</h4>
+<p>结构不变鲁棒性把信息绑定到predicate-argument relations、AMR、semantic
+graph或其他显式结构[28]。它有机会比连续embedding更容易解释和验证，但依赖语义解析和结构重建，容量通常受可用结构数量限制，跨语言和复杂句式下的结构一致性仍未充分解决。</p>
+<h4 id="机制之间的组合">4.7.6 机制之间的组合</h4>
+<p>实际系统通常需要组合机制，但不能把机制与变换层级理解为一一映射：同一机制可能覆盖多个transformation
+levels，同一transformation也可能需要多种机制共同处理。例如，一个多比特语义水印可能需要“semantic
+region + segment allocation + ECC + private
+detector”；一个鲁棒生成式隐写系统可能需要“token sampling + anchored
+context + redundancy + semantic
+verification”。组合会增加计算成本和检测/容量权衡，也可能暴露更明显的结构模式。</p>

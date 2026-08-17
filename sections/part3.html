@@ -1,0 +1,194 @@
+<h2 id="information-carrier的演化与技术路线">3 Information
+Carrier的演化与技术路线</h2>
+<p>本节不再按“隐写/水印”分成两个孤立部分，而按信息承载单元及其carrier-preserving机制组织方法。每一类方法都同时讨论隐写和水印，重点回答carrier、攻击破坏对象以及鲁棒性机制。</p>
+<h3 id="tokendistribution-level-carrier">3.1 Token/distribution-level
+carrier</h3>
+<h4 id="共同载体token身份概率和采样随机性">3.1.1
+共同载体：token身份、概率和采样随机性</h4>
+<p>Neural Linguistic
+Steganography将算术编码与神经语言模型结合，使秘密比特流控制模型采样过程，并尽量使生成文本符合语言模型分布[1]。Dai和Cai提出patient-Huffman，针对早期方法对流畅文本统计假设的依赖进行改进，以降低隐写分布与自然文本分布的差异[2]。Shen等人提出自调整算术编码，根据语言模型概率动态调整编码过程，在嵌入率和KL散度方面改进了早期方法[3]。</p>
+<p>这些方法的共同carrier是token identity、token probability或sampling
+interval：发送者在每个自回归步骤根据候选token概率把秘密比特映射为某个采样区间或候选选择，接收者再依据相同的模型和上下文反向解码。其优点是嵌入过程直接、容量相对较高，并且容易利用语言模型的自然概率分布生成文本；其主要代价是对模型、tokenizer、采样参数和历史上下文的同步依赖很强。</p>
+<h4 id="可证明安全隐写安全不自动等于鲁棒">3.1.2
+可证明安全隐写：安全不自动等于鲁棒</h4>
+<p>Meteor将生成模型视作自然通信分布的采样器，通过密码学机制把秘密消息嵌入采样随机性，目标是让隐写文本与模型正常输出在计算上不可区分[4]。Zhang等人提出Adaptive
+Dynamic
+Grouping（ADG），根据token概率递归构造候选分组，以获得可证明安全的生成式隐写[5]。de
+Witt等人从最小熵耦合角度研究完全安全隐写，分析在保持边缘分布的同时提高嵌入效率的条件[6]。Ding等人的Discop通过构造多个具有相同概率分布的“distribution
+copies”，利用副本编号传递消息，从而在理论上保持原始分布[7]。SparSamp通过稀疏采样提高安全隐写效率[8]；RRC通过范围编码提高熵利用率，并讨论零KL和生成效率之间的关系[9]。SA-ANS则从自调整非对称数系角度研究可指定嵌入率和统计不可感知的语言隐写[42]。</p>
+<p>上述工作主要解决的是distribution matching、computational
+indistinguishability或信息论安全问题。它们的理论保证通常针对被动隐写分析者，或者针对特定的随机采样和信道模型；如果攻击者改变一个token、插入一段文本或重新分词，解码器可能进入不同的自回归状态。与此同时，LLM隐写分析研究也表明，检测能力本身会随模型、数据和攻击设置变化[17,18]。因而：</p>
+<blockquote>
+<p>zero-KL、低分布失真或计算不可区分性描述的是security/imperceptibility性质，并不自动推出对R0—R5变换信道的robustness。</p>
+</blockquote>
+<h4 id="token级水印">3.1.3 Token级水印</h4>
+<p>KGW水印根据密钥和前文token将词表划分为green list和red
+list，并提高green list token的采样概率[20]。它的carrier是密钥控制的token
+partition和token selection
+bias；检测器通过统计green-token比例或相关统计量判断水印是否存在。KGW的优势是无需重新训练模型，检测器可以不访问原始生成模型；主要问题是前文token
+hash、token
+identity和局部token统计对重分词、插入、删除及释义较为敏感。</p>
+<p>后续工作对KGW类水印的可靠性进行了更严格的评估，说明短文本、低熵文本、人类改写和机器释义都会显著影响检测证据[21]。因此，token级水印适合作为高效的来源检测基线，但不能仅凭原始文本上的高检测率就称为对强语义变换鲁棒。</p>
+<p>Unigram/GPTWatermark使用相对固定的词表分组，减少对前文token
+hash的依赖，并对生成质量、检测正确性和一定编辑/释义条件下的鲁棒性进行理论分析[23]。这类设计改善了上下文依赖，但仍然属于token-level
+carrier，并不等同于语义不变量。Robust distortion-free
+watermark和edit-distance robust
+watermark则分别从无分布失真和编辑距离鲁棒的角度研究插入、删除和替换信道[22,24]。</p>
+<h3 id="carrier-preserving-coding-and-synchronization-over-tokenpositioncontext">3.2
+Carrier-preserving coding and synchronization over
+token/position/context</h3>
+<p>本节不同于后续Feature、Semantic-space和Semantic-structure所讨论的carrier
+abstraction。这里主要研究在不改变token、position、segment和sampling-level
+carrier本质的情况下，通过冗余、纠错、alignment、context
+reconstruction和synchronization增强鲁棒性：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Carrier-preserving robustness</mtext><mo>≠</mo><mtext mathvariant="normal">new carrier abstraction</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{Carrier-preserving robustness}
+\neq
+\text{new carrier abstraction}.
+</annotation></semantics></math></p>
+<h4 id="carrier定义与局部错误导致的全局失同步">3.2.1
+Carrier定义与局部错误导致的全局失同步</h4>
+<p>自回归隐写的一个关键脆弱点是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">local error</mtext><mo>→</mo><mtext mathvariant="normal">bit-slippage</mtext><mo>→</mo><mtext mathvariant="normal">state drift</mtext><mo>→</mo><mtext mathvariant="normal">global decoding failure</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{local error}
+\rightarrow
+\text{bit-slippage}
+\rightarrow
+\text{state drift}
+\rightarrow
+\text{global decoding failure}.
+</annotation></semantics></math></p>
+<p>当文本被插入或删除时，后续token的边界、位置和上下文状态会改变；即使后续文本与原文高度相似，接收者也可能无法确定从哪里继续解码。该问题不同于语义是否保持，而是编码和接收端是否重新建立同步。</p>
+<h4 id="代表方法及其作用范围">3.2.2 代表方法及其作用范围</h4>
+<p>Yan和Murawaki专门研究了LLM隐写和水印中的tokenization
+inconsistency，指出发送端生成token与接收端重新分词之间的差异会导致提取失败，并分别提出隐写侧的stepwise
+verification和水印侧的post-hoc
+rollback处理分词与步进不一致[16]。该工作说明R0表示变换并不是工程细节，而是语言隐写和水印的基本信道问题。</p>
+<p>Anchored Sliding
+Window（ASW）针对长上下文和局部修改造成的状态漂移，在滑动上下文中保留prompt和bridge
+context，并通过prompt
+distillation与self-distillation优化桥接上下文[15]。它的核心贡献不是简单地把carrier提升到语义层，而是在原有生成式carrier上增加可重建的上下文锚点，从而改善局部编辑后的同步和连续生成。</p>
+<p>STEAD进一步把carrier-preserving
+robustness与非自回归/部分并行生成结合起来。该方法使用diffusion language
+model在去噪位置上进行robust position
+embedding，并在消息嵌入中结合repetitive error-correcting
+code；提取阶段加入pseudo-random error correction和neighborhood search
+correction[47]。其理论和实验针对token ambiguity以及token-level
+insertion、deletion、substitution，并额外测试了词级同义替换；因此它属于位置/采样carrier上的coding与synchronization
+robustness，而不是semantic-invariant方法。其关键观察是：DLM的部分并行生成可以减少传统autoregressive
+generation的顺序误差传播，但仍需要ECC和邻域搜索处理位置偏移。</p>
+<p>编辑距离鲁棒水印将插入、删除、替换建模为可控编辑信道，并讨论编码距离与检测之间的关系[24]。多比特水印中的position
+allocation、伪随机分段和错误纠正也属于这一机制族：Yoo等人将不同消息片段分配到不同文本区域，以支持不访问原始模型的多比特提取[34]；Qu等人结合伪随机段分配、错误纠正和均衡段分配，在有限长度文本中实现多比特用户信息追踪，并给出一定编辑距离下的鲁棒性分析[36]。</p>
+<p>Kuditipudi等人的Robust Distortion-free Watermarks以autoregressive
+sampling randomness和generated token
+sequence为低层carrier：发送端把密钥生成的随机数序列映射到语言模型样本，检测端将收到的文本与随机数序列重新对齐，并实例化了inverse
+transform sampling和exponential minimum
+sampling[22]。它通过alignment增强R1 edit
+robustness，而不是通过语义carrier获得鲁棒性；论文报告了随机token替换、插入和删除下的检测能力，并设置了round-trip
+translation实验，同时指出低熵指令回答和某些自动释义攻击会显著降低可检测性。该工作清楚体现了：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><menclose notation="box"><mrow><mtext mathvariant="normal">Information Carrier</mtext><mo>≠</mo><mtext mathvariant="normal">Robustness Mechanism</mtext></mrow></menclose><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\boxed{\text{Information Carrier}\neq\text{Robustness Mechanism}}.
+</annotation></semantics></math></p>
+<p>RBC watermark将水印比特编码为error-correcting
+code，并在不改变原始概率分布的条件下进行检测，论文在编辑、删除和翻译条件下进行评估[48]。它仍然依赖token/sampling-level信号，但把ECC作为核心鲁棒机制，因而应同时放入低层carrier和R1/R4的Transformation–Mechanism
+Mapping中；其跨语言结果不能被概括为“语义结构不变量”。</p>
+<p>这一类方法的共同特征是：它们通常没有摆脱token或位置carrier，而是在原carrier上加入冗余、ECC、分段定位、滑动窗口或同步验证。因此其主要鲁棒性属于：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mtext mathvariant="normal">Coding/Synchronization Robustness</mtext></menclose><annotation encoding="application/x-tex">
+\boxed{\text{Coding/Synchronization Robustness}}
+</annotation></semantics></math></p>
+<p>而不是semantic-invariant
+robustness。它们可以抵抗部分局部错误，却不必然抵抗会重构语义表达的释义和翻译。</p>
+<h3 id="featureattribute-level-carrier">3.3 Feature/attribute-level
+carrier</h3>
+<h4 id="句子属性关键词和语义特征">3.3.1 句子属性、关键词和语义特征</h4>
+<p>句子属性编码方法通过情感、语气、句式等可分析属性隐藏信息，并利用释义模型把文本调整到目标属性，接收时主要依赖属性分析器解码[13]。MMLS联合句法空间和词汇空间进行多粒度修改：一部分信息通过句法结构或释义候选嵌入，另一部分通过同义词或词汇替换嵌入[12]。这些方法的carrier不再是单个token，而是sentence
+attribute、syntax pattern、keyword或局部semantic feature。</p>
+<p>但属性或关键词也不是天然不变的carrier。释义可能保留句子意图，却改变情感强度、语气、句式或关键词；如果攻击者知道属性分析器，还可以针对边界进行定向改写。因而这类方法更准确的表述是“feature-based
+carrier”或“attribute-based
+robustness”，除非论文明确验证了目标变换信道下的信息恢复。</p>
+<p>根据目前可获得的公开摘要和书目信息，KR-stega以keyword作为句子层面的鲁棒特征，并使用LSH对词语语义空间进行划分，再根据目标keyword生成隐写文本；其公开信息显示该方法同时涉及keyword
+carrier、语义分区和面向隐写分析的采样策略[50]。现有公开信息主要支持其paraphrase
+robustness和steganalysis resistance，不应扩展为translation
+robustness；具体容量、攻击参数和完整实验范围仍需以正式论文全文复核。LLM-Stega同样使用keyword
+set和加密映射，但其重点是<code>[Black-box][Generation-time]</code>部署，而不是把black-box本身视为carrier[10]。</p>
+<p>PostMark、COLING 2025后处理水印和paraphraser-based multi-bit
+watermark则分别把semantic/syntactic anchor或释义器行为作为feature-level
+carrier：PostMark在已有文本上选择上下文相关词语，COLING工作通过对语义/句法关键词进行同义替换实现黑盒后处理，Xu等人的多比特方法用一对paraphraser的行为差异编码比特[30,32,35]。这些方法应在表格中标记<code>[Black-box]</code>和<code>[Post-hoc]</code>，而不是另立“black-box
+carrier”类别。</p>
+<h3 id="semantic-space-carrier">3.4 Semantic-space carrier</h3>
+<h4 id="从token选择到语义区域">3.4.1 从token选择到语义区域</h4>
+<p>语义空间方法将消息映射到语义表示、语义聚类或语义区域，再让LLM生成落入目标区域的文本：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>→</mo><mtext mathvariant="normal">semantic representation/region</mtext><mo>→</mo><mi>y</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+m
+\rightarrow
+\text{semantic representation/region}
+\rightarrow
+y.
+</annotation></semantics></math></p>
+<p>Semantic Steganography将秘密消息映射到由ontology/entity
+tree构造的语义空间，并让LLM生成符合目标语义类别的文本，主要讨论对文本渲染和词屏蔽等复杂信道的抵抗能力[11]。该方法代表了从“选择某个token”向“选择一个语义类别”的转变：如果表层词语变化但语义类别保持，接收端可能继续恢复消息；不过这不应直接外推为对一般LLM释义或翻译鲁棒。</p>
+<p>在水印方向，Semantic Invariant
+Watermark利用LLM语义表示生成水印相关的logits，以减少对单个前文token的依赖[25]；SemaMark以语义特征替代简单的前文token
+hash，目标是提高对释义的鲁棒性[27]；SemStamp使用句子embedding和局部敏感哈希（LSH）划分语义空间，通过rejection
+sampling生成落在指定语义分区的句子，并针对bigram
+paraphrase进行评测[26]。</p>
+<p>k-SemStamp是SemStamp的聚类化改进，将LSH的随机超平面分区替换为面向特定文本域的k-means
+semantic
+clustering[46]。SemStamp的LSH可能把语义相近且靠近随机超平面边界的句子分到不同区域；k-SemStamp利用域数据学习cluster
+centroid，使分区更贴合语义结构，论文报告其在句子级释义攻击下的鲁棒性和sampling
+efficiency均得到改善。它仍属于sentence-level semantic region
+carrier，不能据此推断对翻译或跨语言攻击鲁棒。</p>
+<p>在这一局部技术演化关系中，可以概括为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">semantic-conditioned token</mtext><mo>→</mo><mtext mathvariant="normal">sentence semantic region</mtext><mo>→</mo><mtext mathvariant="normal">cluster-aware semantic region</mtext><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\text{semantic-conditioned token}
+\rightarrow
+\text{sentence semantic region}
+\rightarrow
+\text{cluster-aware semantic region},
+</annotation></semantics></math></p>
+<p>但这不是所有semantic watermark的统一线性发展。</p>
+<p>PASA在latent semantic
+clusters上构造token序列与辅助随机序列之间的、由密钥和semantic
+history同步的分布依赖[51]。它是semantic-cluster carrier与token-level
+statistical
+detection的结合，并以distortion-free和强释义攻击下的检测为主要目标；论文没有因此自动获得R4跨语言不变量。DEW则联合contextual
+semantic embedding和token-level semantic
+embedding，通过密钥控制的伪随机投影构造水印信号，并在预印本中报告了释义和翻译条件下的检测实验[52]。由于DEW仍同时依赖上下文和token表示，应将其视为semantic-feature/semantic-space的混合carrier，而不是显式semantic-structure方法。SemanticShift则通过语义漂移和密钥引导的候选选择实现无需重新训练的语义水印[29]。</p>
+<p>这些方法可能比纯token carrier更能保留释义后的信号，但“使用semantic
+embedding”本身不等于实现了semantic
+robustness。严格来说，需要验证：对于目标变换<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>，是否有：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Sem</mo><mrow><mo form="prefix" stretchy="true">(</mo><mi>T</mi><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow><mo form="postfix" stretchy="true">)</mo></mrow><mo>≈</mo><mo>Sem</mo><mrow><mo form="prefix" stretchy="true">(</mo><mi>y</mi><mo form="postfix" stretchy="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\operatorname{Sem}(T(y))\approx\operatorname{Sem}(y)
+</annotation></semantics></math></p>
+<p>并且语义表示的变化不会使消息所在的分区、阈值或检测统计量发生不可恢复的跳变。</p>
+<h4 id="主要失败模式">3.4.2 主要失败模式</h4>
+<p>语义空间信息隐藏面临以下问题：</p>
+<ol type="1">
+<li><strong>Embedding boundary crossing：</strong>
+语义保持型改写可能跨越LSH或聚类边界，导致载荷翻转；</li>
+<li><strong>Semantic cluster instability：</strong>
+不同随机种子、文本长度和上下文可能产生不稳定的语义分区；</li>
+<li><strong>Encoder dependency：</strong>
+换用embedding模型、语言或领域后，同一文本的语义位置可能改变；</li>
+<li><strong>Domain shift：</strong>
+训练或调参使用的新闻、问答文本不能保证覆盖代码、数学、中文和低熵回答；</li>
+<li><strong>Semantic collision：</strong>
+不同表达可能映射到同一语义区域，降低可解码性或增加伪造机会；</li>
+<li><strong>Segmentation dependency：</strong>
+句子拆分、合并和摘要会改变语义单元，破坏原有分区或局部统计。</li>
+</ol>
+<p>因此，语义空间方法的鲁棒性应报告具体的R3攻击、语义保持度和检测/恢复曲线；不能从语义carrier的存在直接推断其对R4翻译或A2规则窃取鲁棒。</p>
+<h3 id="semantic-structure-carrier">3.5 Semantic-structure carrier</h3>
+<p>SWAN使用抽象含义表示（Abstract Meaning
+Representation，AMR）承载水印，通过AMR解析和比例检验进行检测，目标是在保留意义的释义后继续保留水印[28]。与仅把句子映射到连续embedding区域的方法相比，AMR把predicate-argument
+relations等显式语义结构作为carrier，代表了：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">continuous semantic embedding</mtext><mo>→</mo><mtext mathvariant="normal">explicit semantic structure</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{continuous semantic embedding}
+\rightarrow
+\text{explicit semantic structure}.
+</annotation></semantics></math></p>
+<p>explicit semantic structure为paraphrase robustness提供了另一种carrier
+abstraction，但其有效性取决于谓词—论元关系、实体关系和事件结构在变换后是否被保留，以及AMR
+parser是否稳定。它同时引入semantic parser error、AMR reconstruction
+instability、结构容量受限和跨语言解析器不一致等误差源。因此，结构carrier不是无条件优于embedding
+carrier，而是把鲁棒性问题从“向量分区是否稳定”转化为“结构是否被可靠解析和保持”。</p>
